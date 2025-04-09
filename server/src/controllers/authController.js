@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const signup = async (req, res) => {
@@ -29,4 +30,23 @@ const signup = async (req, res) => {
   }
 };
 
-module.exports = { signup };
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "존재하지 않는 이메일입니다." });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: "비밀번호가 일치하지 않습니다." });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.status(200).json({ message: "로그인 성공", token });
+  } catch (err) {
+    console.error("로그인 에러:", err);
+    res.status(500).json({ message: "서버 오류" });
+  }
+};
+
+module.exports = { signup, login };
