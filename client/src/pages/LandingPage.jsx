@@ -1,8 +1,10 @@
 import { Play, CheckCircle, Users, Brain, Calendar, ArrowRight } from "lucide-react"
 import Button from "../components/Button"
 import logo from "../assets/logo.png"
+import { useNavigate } from "react-router-dom"
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,7 +36,7 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm">
+              <Button onClick={() => navigate('/login')} variant="ghost" size="sm">
                 로그인
               </Button>
               <Button size="sm">시작하기</Button>
@@ -57,7 +59,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => navigate('/login')} className="bg-green-600 hover:bg-green-700">
                     지금 시작해보세요
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>

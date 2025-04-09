@@ -2,16 +2,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import { Analytics } from "@vercel/analytics/react"
+import LoginPage from './pages/LoginPage'
+import AppRoutes from './routes'
 
 export default function App() {
   return (
     <>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        {/* 추후 여기에 다른 페이지도 추가 */}
-      </Routes>
-    </BrowserRouter>
+    <AppRoutes/>
     <Analytics/>
     </>
   )
