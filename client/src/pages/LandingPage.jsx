@@ -36,10 +36,10 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center space-x-2">
-              <Button onClick={() => navigate('/login')} variant="ghost" size="sm">
-                로그인
+              <Button onClick={() => navigate('/signup')} variant="ghost" size="sm">
+                회원가입
               </Button>
-              <Button size="sm">시작하기</Button>
+              <Button onClick={() => navigate('/login')} size="sm">시작하기</Button>
             </nav>
           </div>
         </div>
@@ -63,7 +63,6 @@ export default function LandingPage() {
                     지금 시작해보세요
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                  <Button variant="outline">Learn More</Button>
                 </div>
                 <div className="flex items-center space-x-4 text-sm">
                   <div className="flex items-center space-x-1">
