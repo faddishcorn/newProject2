@@ -5,8 +5,10 @@ import { Eye, EyeOff } from "lucide-react"
 import Button from "../components/Button"
 import logo from "../assets/logo.png"
 import axios from 'axios';
+import { useNavigate } from "react-router-dom"
 
 export default function SignupPage() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({
     username: '',
@@ -29,6 +31,11 @@ export default function SignupPage() {
     try {
       const res = await axios.post('/api/auth/signup', form);
       setMessage(res.data.message);
+//       setMessage("회원가입 성공! 로그인 페이지로 이동합니다...");
+// setTimeout(() => {
+//   navigate("/login");
+// }, 1000);
+navigate("/login");
     } catch (err) {
       setMessage(err.response?.data?.message || '회원가입 실패');
     }
@@ -199,6 +206,9 @@ export default function SignupPage() {
   </div>
 
   <Button className="w-full bg-primary hover:bg-primary/90" type="submit">회원가입</Button>
+  {message && (
+  <p className="text-red-500 text-sm text-center mt-2">{message}</p>
+)}
 </form>
 
 
