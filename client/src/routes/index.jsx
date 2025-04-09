@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from '../pages/LandingPage';
 import LoginPage from '../pages/LoginPage';
 import SignupPage from '../pages/SignupPage';
-
+import MainPage from '../pages/MainPage';
 import PrivateRoute from "./PrivateRoute"
+import MainLayout from '../layouts/MainLayout';
 
 export default function AppRoutes() {
   return (
@@ -20,7 +21,7 @@ export default function AppRoutes() {
             </PrivateRoute>
           }
         >
-
+          <Route path="/main" element={<MainPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
