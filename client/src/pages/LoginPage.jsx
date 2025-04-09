@@ -1,6 +1,6 @@
-import { Github, Mail } from "lucide-react"
 import Button from "../components/Button"
 import logo from "../assets/logo.png"
+
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
@@ -54,26 +54,6 @@ export default function LoginPage() {
             </div>
             <Button className="w-full bg-primary hover:bg-primary/90">로그인</Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">또는</span>
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <Button variant="outline" className="flex items-center justify-center gap-2">
-              <Github className="h-4 w-4" />
-              GitHub로 로그인
-            </Button>
-            <Button variant="outline" className="flex items-center justify-center gap-2">
-              <Mail className="h-4 w-4" />
-              Google로 로그인
-            </Button>
-          </div>
 
           <div className="mt-4 text-center text-sm">
             계정이 없으신가요?{" "}
