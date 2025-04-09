@@ -3,8 +3,10 @@ import logo from "../assets/logo.png"
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function LoginPage() {
+
   const [form, setForm] = useState({ email: "", password: "" });
 const [message, setMessage] = useState("");
 const navigate = useNavigate();
@@ -28,7 +30,12 @@ const handleSubmit = async (e) => {
     setMessage(err.response?.data?.message || "로그인 실패");
   }
 };
-
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    navigate("/main"); // 로그인된 유저는 로그인 페이지 진입 불가
+  }
+}, []);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       <div className="absolute top-4 left-4 md:top-8 md:left-8">
@@ -86,6 +93,7 @@ const handleSubmit = async (e) => {
               />
             </div>
             <Button className="w-full bg-primary hover:bg-primary/90">로그인</Button>
+            {message && <p className="text-red-500 text-sm text-center">{message}</p>}
           </form>
 
           <div className="mt-4 text-center text-sm">
