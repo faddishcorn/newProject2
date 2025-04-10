@@ -18,7 +18,7 @@ const handleChange = (e) => {
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const res = await axios.post("/api/auth/login", form); // 로그인 요청
+    const res = await axios.post(`${import.meta.env.VITE_API_BASE}/api/auth/login`, form); // 로그인 요청
     const { token } = res.data;
 
     // 로그인 성공 시 토큰 저장
