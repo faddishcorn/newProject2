@@ -5,6 +5,7 @@ import SignupPage from '../pages/SignupPage';
 import MainPage from '../pages/MainPage';
 import PrivateRoute from "./PrivateRoute"
 import MainLayout from '../layouts/MainLayout';
+import RoutinesPage from '../pages/RoutinesPage';
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function AppRoutes() {
           }
         >
           <Route path="/main" element={<MainPage />} />
+          <Route path="/routines" element={<RoutinesPage/>}/>
         </Route>
       </Routes>
     </BrowserRouter>
