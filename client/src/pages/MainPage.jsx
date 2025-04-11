@@ -1,16 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar, Activity, Award, TrendingUp, Users } from "lucide-react"
+import { Activity, TrendingUp } from "lucide-react"
 
 export default function MainPage() {
   const [greeting, setGreeting] = useState("")
   const [userName, setUserName] = useState("사용자")
   const [stats, setStats] = useState({
-    streak: 5,
     totalWorkouts: 23,
     thisWeek: 3,
-    friends: 8,
   })
 
   // 시간에 따른 인사말 설정
@@ -57,67 +55,20 @@ export default function MainPage() {
     },
   ]
 
-  // 최근 활동 데이터
-  const recentActivities = [
-    {
-      id: 1,
-      type: "운동 완료",
-      name: "하체 운동 루틴",
-      date: "오늘",
-      time: "14:30",
-    },
-    {
-      id: 2,
-      type: "친구 추가",
-      name: "김철수님이 친구가 되었습니다",
-      date: "어제",
-      time: "18:45",
-    },
-    {
-      id: 3,
-      type: "배지 획득",
-      name: "3일 연속 운동 배지 획득",
-      date: "2일 전",
-      time: "20:15",
-    },
-  ]
-
   return (
     <div className="space-y-8">
       {/* 헤더 섹션 */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              {greeting}, {userName}님!
-            </h1>
-            <p className="text-gray-600 mt-1">{formattedDate}</p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <button
-              className="px-4 py-2 rounded-md text-white font-medium transition-colors"
-              style={{ backgroundColor: "#6ca7af" }}
-            >
-              오늘의 운동 시작하기
-            </button>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {greeting}, {userName}님!
+          </h1>
+          <p className="text-gray-600 mt-1">{formattedDate}</p>
         </div>
       </div>
 
       {/* 통계 카드 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full" style={{ backgroundColor: "rgba(108, 167, 175, 0.2)" }}>
-              <Calendar size={24} style={{ color: "#6ca7af" }} />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">연속 운동일</p>
-              <p className="text-2xl font-semibold text-gray-800">{stats.streak}일</p>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white rounded-lg shadow-sm p-5">
           <div className="flex items-center">
             <div className="p-3 rounded-full" style={{ backgroundColor: "rgba(108, 167, 175, 0.2)" }}>
@@ -141,18 +92,6 @@ export default function MainPage() {
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full" style={{ backgroundColor: "rgba(108, 167, 175, 0.2)" }}>
-              <Users size={24} style={{ color: "#6ca7af" }} />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">친구</p>
-              <p className="text-2xl font-semibold text-gray-800">{stats.friends}명</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* 추천 루틴 섹션 */}
@@ -171,36 +110,11 @@ export default function MainPage() {
                 className="w-full mt-3 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
                 style={{ backgroundColor: "#6ca7af" }}
               >
-                루틴 보기
+                루틴 시작하기
               </button>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* 최근 활동 섹션 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">최근 활동</h2>
-        <div className="space-y-4">
-          {recentActivities.map((activity) => (
-            <div key={activity.id} className="flex items-start border-b pb-4 last:border-0">
-              <div className="p-2 rounded-full bg-gray-100">
-                {activity.type === "운동 완료" && <Activity size={20} style={{ color: "#6ca7af" }} />}
-                {activity.type === "친구 추가" && <Users size={20} style={{ color: "#6ca7af" }} />}
-                {activity.type === "배지 획득" && <Award size={20} style={{ color: "#6ca7af" }} />}
-              </div>
-              <div className="ml-3">
-                <p className="font-medium text-gray-800">{activity.name}</p>
-                <p className="text-sm text-gray-500">
-                  {activity.date} {activity.time}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className="mt-4 text-sm font-medium" style={{ color: "#6ca7af" }}>
-          모든 활동 보기
-        </button>
       </div>
     </div>
   )
