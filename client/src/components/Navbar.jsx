@@ -1,15 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Home, Users, Calendar, User, BarChart2, Menu, X } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Home, Users, Calendar, User, BarChart2, Menu, X, LogOut } from "lucide-react"
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
 
   const menuItems = [
-    { name: "메인", path: "/dashboard", icon: <Home size={20} /> },
+    { name: "메인", path: "/main", icon: <Home size={20} /> },
     { name: "소셜", path: "/social", icon: <Users size={20} /> },
     { name: "루틴관리", path: "/routines", icon: <Calendar size={20} /> },
     { name: "내정보", path: "/profile", icon: <User size={20} /> },
@@ -20,6 +21,12 @@ export default function Navbar() {
     return location.pathname === path
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    console.log("로그아웃")
+    navigate("/")
+  }
+
   return (
     <nav className="sticky top-0 z-50 w-full" style={{ backgroundColor: "#6ca7af" }}>
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +34,7 @@ export default function Navbar() {
           {/* Logo and desktop navigation */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link to="/dashboard" className="flex items-center">
+              <Link to="/main" className="flex items-center">
                 <span className="text-white font-bold text-xl">바디플랜</span>
               </Link>
             </div>
@@ -47,6 +54,17 @@ export default function Navbar() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Logout button (desktop) */}
+          <div className="hidden md:block">
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-[#5a8f96] transition-colors"
+            >
+              <LogOut size={20} className="mr-2" />
+              로그아웃
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -80,6 +98,15 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
+
+            {/* Logout button (mobile) */}
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#5a8f96] transition-colors"
+            >
+              <LogOut size={20} className="mr-2" />
+              로그아웃
+            </button>
           </div>
         </div>
       )}
