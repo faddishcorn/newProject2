@@ -11,6 +11,7 @@ const RoutineEditor = memo(function RoutineEditor({
   onCancel,
   onSave,
 }) {
+  if (!routine) return null;
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <div className="mb-6">
