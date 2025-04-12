@@ -1,47 +1,22 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { Trash2, Plus, Send, Clock, BarChart } from "lucide-react"
+import { useState, useEffect, useRef, memo } from "react"
+import { Trash2, Plus, Send, X, Save, Loader } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import axios from "axios"
+import RoutineEditor from "../components/RoutineEditor"
 
 export default function RoutinesPage() {
   const [promptInput, setPromptInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [generatedRoutine, setGeneratedRoutine] = useState(null)
+  const [isCreatingNewRoutine, setIsCreatingNewRoutine] = useState(false)
+  const [newRoutine, setNewRoutine] = useState(null)
+  const [savedRoutines, setSavedRoutines] = useState([]);
+  // 수정 중인 루틴 상태
+  const [editingRoutine, setEditingRoutine] = useState(null);
   const textareaRef = useRef(null)
-
-  // 저장된 루틴 목록 (실제로는 API에서 가져올 것입니다)
-  const [savedRoutines, setSavedRoutines] = useState([
-    {
-      id: 1,
-      title: "상체 집중 루틴",
-      description: "팔, 가슴, 어깨를 집중적으로 단련하는 루틴",
-      duration: "45분",
-      level: "중급",
-      createdAt: "2023-04-15",
-    },
-    {
-      id: 2,
-      title: "전신 HIIT 운동",
-      description: "짧은 시간에 효과적인 전신 고강도 인터벌 트레이닝",
-      duration: "30분",
-      level: "고급",
-      createdAt: "2023-05-20",
-    },
-    {
-      id: 3,
-      title: "초보자를 위한 기초 운동",
-      description: "기본적인 동작으로 구성된 전신 운동",
-      duration: "40분",
-      level: "초급",
-      createdAt: "2023-06-10",
-    },
-    {
-      id: 4,
-      title: "하체 강화 루틴",
-      description: "하체 근력을 집중적으로 향상시키는 운동 루틴",
-      duration: "50분",
-      level: "중급",
-      createdAt: "2023-07-05",
-    },
-  ])
+  const navigate = useNavigate()
 
   // 텍스트 영역 자동 크기 조절
   useEffect(() => {
@@ -54,32 +29,327 @@ export default function RoutinesPage() {
     }
   }, [promptInput])
 
+  useEffect(() => {
+    const fetchSavedRoutines = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/api/routines", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setSavedRoutines(res.data);
+      } catch (err) {
+        console.error("루틴 목록 불러오기 실패:", err);
+      }
+    };
+  
+    fetchSavedRoutines();
+  }, []);
+
   const handlePromptSubmit = (e) => {
     e.preventDefault()
     if (!promptInput.trim()) return
 
-    // 실제로는 여기서 AI API 호출 등의 로직이 들어갈 것입니다
-    console.log("프롬프트 제출:", promptInput)
+    // 로딩 상태 시작
+    setIsLoading(true)
 
-    // 입력 필드 초기화
-    setPromptInput("")
+    // API 호출을 시뮬레이션 (실제로는 여기서 AI API 호출)
+    setTimeout(() => {
+      // 예시 루틴 생성 (실제로는 API 응답에서 받아옴)
+      const mockGeneratedRoutine = {
+        title: "AI 생성 맞춤 루틴",
+        exercises: [
+          { id: 1, name: "푸쉬업", sets: 3, reps: 12, isCompleted: false },
+          { id: 2, name: "스쿼트", sets: 3, reps: 15, isCompleted: false },
+          { id: 3, name: "플랭크", sets: 3, reps: 30, isCompleted: false },
+          { id: 4, name: "런지", sets: 3, reps: 10, isCompleted: false },
+        ],
+      }
 
-    // 여기서 AI 응답을 처리하고 새 루틴을 생성하는 로직이 들어갈 것입니다
+      // 생성된 루틴 설정 및 로딩 상태 종료
+      setGeneratedRoutine(mockGeneratedRoutine)
+      setIsLoading(false)
+    }, 2000) // 2초 후 로딩 완료 (시뮬레이션)
+  }
+
+  const handleCreateNewRoutine = () => {
+    // 새 루틴 템플릿 생성
+    setNewRoutine({
+      title: "새 루틴",
+      exercises: [{ id: Date.now(), name: "운동 1", sets: 3, reps: 10, isCompleted: false }],
+    })
+    setIsCreatingNewRoutine(true)
   }
 
   const handleEditRoutine = (routineId) => {
-    // 실제로는 여기서 루틴 편집 모달을 열거나 편집 페이지로 이동하는 로직이 들어갈 것입니다
-    console.log("루틴 편집:", routineId)
+    const target = savedRoutines.find((r) => r._id === routineId);
+    if (target) {
+      const clonedExercises = target.exercises.map((ex, idx) => ({
+        id: ex._id || ex.id || idx,
+        ...ex,
+      }));
+      setEditingRoutine({ ...target, exercises: clonedExercises });
+    }
+  };
+
+  const handleUpdateRoutine = async (routine) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.put(
+        `/api/routines/${routine._id}`,
+        {
+          title: routine.title,
+          exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      const updated = savedRoutines.map((r) => (r._id === res.data._id ? res.data : r));
+      setSavedRoutines(updated);
+      setEditingRoutine(null);
+      setGeneratedRoutine(null);
+      setIsCreatingNewRoutine(false);
+      setPromptInput("");
+    } catch (err) {
+      console.error("루틴 수정 실패:", err);
+    }
+  };
+
+  const handleDeleteRoutine = async (routineId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`/api/routines/${routineId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedRoutines(savedRoutines.filter((routine) => routine._id !== routineId));
+    } catch (err) {
+      console.error("루틴 삭제 실패:", err);
+    }
+  };
+
+  // 저장 핸들러 라우팅
+const handleSaveRoutine = (routine) => {
+  if (routine._id) {
+    handleUpdateRoutine(routine);
+  } else {
+    handleCreateRoutine(routine);
+  }
+};
+
+  // 루틴 저장 (새 루틴용)
+const handleCreateRoutine = async (routine) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      "/api/routines",
+      {
+        title: routine.title,
+        exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    setSavedRoutines([res.data, ...savedRoutines]);
+    setGeneratedRoutine(null);
+    setNewRoutine(null);
+    setIsCreatingNewRoutine(false);
+    setPromptInput("");
+    navigate("/main");
+  } catch (err) {
+    console.error("루틴 저장 실패:", err);
+  }
+};
+
+const handleCancelRoutine = () => {
+  setEditingRoutine(null);
+  setGeneratedRoutine(null);
+  setNewRoutine(null);
+  setIsCreatingNewRoutine(false);
+  setPromptInput("");
+};
+
+const handleRoutineTitleChange = (e, isNew = false) => {
+  const updatedTitle = e.target.value;
+  if (isNew) {
+    setNewRoutine((prev) => ({ ...prev, title: updatedTitle }));
+  } else if (editingRoutine) {
+    setEditingRoutine((prev) => ({ ...prev, title: updatedTitle }));
+  } else {
+    setGeneratedRoutine((prev) => ({ ...prev, title: updatedTitle }));
+  }
+};
+
+  // 운동 수정
+  const handleExerciseChange = (exerciseId, field, value, isNew = false) => {
+    const updateRoutine = (routine) => {
+      const updatedExercises = routine.exercises.map((ex) =>
+        (ex.id === exerciseId || ex._id === exerciseId)
+          ? { ...ex, [field]: value }
+          : ex
+      );
+      return {
+        ...routine,
+        exercises: updatedExercises
+      };
+    };
+  
+    if (isNew) {
+      setNewRoutine(updateRoutine);
+    } else if (editingRoutine) {
+      setEditingRoutine(updateRoutine);
+    } else {
+      setGeneratedRoutine(updateRoutine);
+    }
+  };
+
+
+  // 운동 삭제
+  const handleRemoveExercise = (exerciseId, isNew = false) => {
+    const updateRoutine = (routine) => {
+      const filteredExercises = routine.exercises.filter(
+        (ex) => ex.id !== exerciseId && ex._id !== exerciseId
+      );
+      return { ...routine, exercises: filteredExercises };
+    };
+    if (isNew) {
+      setNewRoutine((prev) => updateRoutine(prev));
+    } else if (editingRoutine) {
+      setEditingRoutine((prev) => updateRoutine(prev));
+    } else {
+      setGeneratedRoutine((prev) => updateRoutine(prev));
+    }
+  };
+
+  // 운동 추가
+  const handleAddExercise = (isNew = false) => {
+    const newExercise = {
+      id: Date.now(),
+      name: "새 운동",
+      sets: 3,
+      reps: 10,
+      isCompleted: false,
+    };
+  
+    if (isNew) {
+      setNewRoutine({ ...newRoutine, exercises: [...newRoutine.exercises, newExercise] });
+    } else if (editingRoutine) {
+      setEditingRoutine({ ...editingRoutine, exercises: [...editingRoutine.exercises, newExercise] });
+    } else {
+      setGeneratedRoutine({ ...generatedRoutine, exercises: [...generatedRoutine.exercises, newExercise] });
+    }
+  };
+
+  // 로딩 중이거나 루틴이 생성된 경우 메인 컨텐츠를 표시하지 않음
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {/* 헤더 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h1 className="text-2xl font-bold text-gray-800">루틴 생성</h1>
+          <p className="text-gray-600 mt-1">AI가 맞춤형 운동 루틴을 생성하고 있습니다...</p>
+        </div>
+
+        {/* 로딩 상태 */}
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="relative w-24 h-24">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader size={48} className="animate-spin text-[#6ca7af]" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              <Loader size={64} className="animate-spin text-[#6ca7af] animation-delay-300" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+              <Loader size={80} className="animate-spin text-[#6ca7af] animation-delay-600" />
+            </div>
+          </div>
+          <p className="mt-6 text-lg font-medium text-gray-700">AI가 루틴을 생성하고 있습니다</p>
+          <p className="mt-2 text-sm text-gray-500">잠시만 기다려주세요...</p>
+        </div>
+      </div>
+    )
   }
 
-  const handleDeleteRoutine = (routineId) => {
-    // 실제로는 여기서 삭제 확인 모달을 표시하고 확인 시 삭제하는 로직이 들어갈 것입니다
-    console.log("루틴 삭제:", routineId)
+  // AI 생성 루틴 편집 화면
+  if (generatedRoutine) {
+    return (
+      <div className="space-y-8">
+        {/* 헤더 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h1 className="text-2xl font-bold text-gray-800">루틴 생성</h1>
+          <p className="text-gray-600 mt-1">생성된 루틴을 확인하고 수정하세요</p>
+        </div>
 
-    // 임시 구현: 해당 ID의 루틴을 목록에서 제거
-    setSavedRoutines(savedRoutines.filter((routine) => routine.id !== routineId))
+        {/* 루틴 편집기 */}
+        {/* <RoutineEditor routine={generatedRoutine} isNew={false} /> */}
+        <RoutineEditor
+  routine={editingRoutine}
+  isNew={false}
+  onChangeTitle={handleRoutineTitleChange}
+  onChangeExercise={handleExerciseChange}
+  onAddExercise={handleAddExercise}
+  onRemoveExercise={handleRemoveExercise}
+  onCancel={handleCancelRoutine}
+  onSave={handleSaveRoutine}
+/>
+      </div>
+    )
   }
 
+  // 새 루틴 생성 화면
+  if (isCreatingNewRoutine && newRoutine) {
+    return (
+      <div className="space-y-8">
+        {/* 헤더 섹션 */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h1 className="text-2xl font-bold text-gray-800">새 루틴 만들기</h1>
+          <p className="text-gray-600 mt-1">새로운 운동 루틴을 직접 만들어보세요</p>
+        </div>
+
+        {/* 루틴 편집기 */}
+        {/* 조건부 렌더링: newRoutine이 존재할 때만 렌더 */}
+      {newRoutine && (
+        <RoutineEditor
+          routine={newRoutine}
+          isNew={true}
+          onChangeTitle={handleRoutineTitleChange}
+          onChangeExercise={handleExerciseChange}
+          onAddExercise={handleAddExercise}
+          onRemoveExercise={handleRemoveExercise}
+          onCancel={handleCancelRoutine}
+          onSave={handleSaveRoutine}
+        />
+      )}
+      </div>
+    )
+  }
+
+  if (editingRoutine) {
+    return (
+      <div className="space-y-8">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h1 className="text-2xl font-bold text-gray-800">루틴 수정</h1>
+          <p className="text-gray-600 mt-1">루틴을 편집하고 저장하세요</p>
+        </div>
+        <RoutineEditor
+  routine={editingRoutine}
+  isNew={false}
+  onChangeTitle={handleRoutineTitleChange}
+  onChangeExercise={handleExerciseChange}
+  onAddExercise={handleAddExercise}
+  onRemoveExercise={handleRemoveExercise}
+  onCancel={handleCancelRoutine}
+  onSave={handleSaveRoutine}
+/>
+      </div>
+    );
+  }
+  
+  // 기본 루틴 관리 화면
   return (
     <div className="space-y-8">
       {/* 헤더 섹션 */}
@@ -124,6 +394,7 @@ export default function RoutinesPage() {
       {/* 새 루틴 생성 버튼 */}
       <div className="flex justify-end">
         <button
+          onClick={handleCreateNewRoutine}
           className="flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors"
           style={{ backgroundColor: "#6ca7af" }}
         >
@@ -137,11 +408,11 @@ export default function RoutinesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {savedRoutines.map((routine) => (
-            <div key={routine.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={routine._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold text-gray-800">{routine.title}</h3>
                 <button
-                  onClick={() => handleDeleteRoutine(routine.id)}
+                  onClick={() => handleDeleteRoutine(routine._id)}
                   className="p-1 rounded-full hover:bg-gray-100 text-red-500"
                   title="루틴 삭제"
                 >
@@ -149,18 +420,23 @@ export default function RoutinesPage() {
                 </button>
               </div>
 
-              <p className="text-gray-600 text-sm mt-1 line-clamp-2">{routine.description}</p>
-
-              <div className="flex items-center mt-3 text-xs text-gray-500">
-                <Clock size={14} className="mr-1" />
-                <span className="mr-3">{routine.duration}</span>
-                <BarChart size={14} className="mr-1" />
-                <span>{routine.level}</span>
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 mb-2">{routine.exercises.length}개 운동</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  {routine.exercises.slice(0, 3).map((exercise) => (
+                    <li key={`${exercise.name}-${exercise.sets}-${exercise.reps}`} className="truncate">
+                      • {exercise.name} ({exercise.sets}세트 x {exercise.reps}회)
+                    </li>
+                  ))}
+                  {routine.exercises.length > 3 && (
+                    <li className="text-gray-400">• 그 외 {routine.exercises.length - 3}개 운동</li>
+                  )}
+                </ul>
               </div>
 
               <div className="flex justify-center mt-4">
                 <button
-                  onClick={() => handleEditRoutine(routine.id)}
+                  onClick={() => handleEditRoutine(routine._id)}
                   className="w-full px-3 py-2 rounded-md text-white text-sm font-medium transition-colors"
                   style={{ backgroundColor: "#6ca7af" }}
                 >
