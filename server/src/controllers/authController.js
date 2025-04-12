@@ -49,4 +49,9 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { signup, login };
+const getMe = async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password")
+  res.json(user)
+}
+
+module.exports = { signup, login, getMe };
