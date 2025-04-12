@@ -5,6 +5,7 @@ import { Trash2, Plus, Send, X, Save, Loader } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import RoutineEditor from "../components/RoutineEditor"
+import { toast } from "react-toastify"
 
 export default function RoutinesPage() {
   const [promptInput, setPromptInput] = useState("")
@@ -17,6 +18,7 @@ export default function RoutinesPage() {
   const [editingRoutine, setEditingRoutine] = useState(null);
   const textareaRef = useRef(null)
   const navigate = useNavigate()
+  const [error, setError] = useState(null)
 
   // 텍스트 영역 자동 크기 조절
   useEffect(() => {
@@ -47,31 +49,51 @@ export default function RoutinesPage() {
     fetchSavedRoutines();
   }, []);
 
-  const handlePromptSubmit = (e) => {
-    e.preventDefault()
-    if (!promptInput.trim()) return
-
-    // 로딩 상태 시작
-    setIsLoading(true)
-
-    // API 호출을 시뮬레이션 (실제로는 여기서 AI API 호출)
-    setTimeout(() => {
-      // 예시 루틴 생성 (실제로는 API 응답에서 받아옴)
-      const mockGeneratedRoutine = {
-        title: "AI 생성 맞춤 루틴",
-        exercises: [
-          { id: 1, name: "푸쉬업", sets: 3, reps: 12, isCompleted: false },
-          { id: 2, name: "스쿼트", sets: 3, reps: 15, isCompleted: false },
-          { id: 3, name: "플랭크", sets: 3, reps: 30, isCompleted: false },
-          { id: 4, name: "런지", sets: 3, reps: 10, isCompleted: false },
-        ],
+  const handlePromptSubmit = async (e) => {
+    e.preventDefault();
+    if (!promptInput.trim()) return;
+  
+    setIsLoading(true);
+    setError(null); // 이전 에러 초기화
+  
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "/api/gpt/generate-routine",
+        { prompt: promptInput },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+  
+      if (!res.data || !Array.isArray(res.data)) {
+        throw new Error("루틴 형식이 잘못되었습니다.");
       }
-
-      // 생성된 루틴 설정 및 로딩 상태 종료
-      setGeneratedRoutine(mockGeneratedRoutine)
-      setIsLoading(false)
-    }, 2000) // 2초 후 로딩 완료 (시뮬레이션)
-  }
+  
+      const aiRoutine = {
+        title: "AI 생성 루틴",
+        exercises: res.data.map((item, idx) => ({
+          id: Date.now() + idx,
+          name: item.name,
+          sets: item.sets,
+          reps: item.reps,
+          isCompleted: false,
+        })),
+      };
+  
+      setGeneratedRoutine(aiRoutine);
+    } catch (err) {
+      console.error("GPT 루틴 생성 실패:", err);
+      const message = err.response?.data?.message || "루틴 생성 중 오류가 발생했습니다.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateNewRoutine = () => {
     // 새 루틴 템플릿 생성
@@ -269,6 +291,8 @@ const handleRoutineTitleChange = (e, isNew = false) => {
           </div>
           <p className="mt-6 text-lg font-medium text-gray-700">AI가 루틴을 생성하고 있습니다</p>
           <p className="mt-2 text-sm text-gray-500">잠시만 기다려주세요...</p>
+          
+
         </div>
       </div>
     )
@@ -286,16 +310,18 @@ const handleRoutineTitleChange = (e, isNew = false) => {
 
         {/* 루틴 편집기 */}
         {/* <RoutineEditor routine={generatedRoutine} isNew={false} /> */}
-        <RoutineEditor
-  routine={editingRoutine}
-  isNew={false}
-  onChangeTitle={handleRoutineTitleChange}
-  onChangeExercise={handleExerciseChange}
-  onAddExercise={handleAddExercise}
-  onRemoveExercise={handleRemoveExercise}
-  onCancel={handleCancelRoutine}
-  onSave={handleSaveRoutine}
-/>
+        {generatedRoutine && (
+  <RoutineEditor
+    routine={generatedRoutine}
+    isNew={false}
+    onChangeTitle={handleRoutineTitleChange}
+    onChangeExercise={handleExerciseChange}
+    onAddExercise={handleAddExercise}
+    onRemoveExercise={handleRemoveExercise}
+    onCancel={handleCancelRoutine}
+    onSave={handleSaveRoutine}
+  />
+)}
       </div>
     )
   }
