@@ -6,6 +6,7 @@ import MainPage from '../pages/MainPage';
 import PrivateRoute from "./PrivateRoute"
 import MainLayout from '../layouts/MainLayout';
 import RoutinesPage from '../pages/RoutinesPage';
+import RoutineExecutionPage from '../pages/RoutineExecutionPage';
 
 export default function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ export default function AppRoutes() {
         >
           <Route path="/main" element={<MainPage />} />
           <Route path="/routines" element={<RoutinesPage/>}/>
+          <Route path="routine-execution/:routineId" element={<RoutineExecutionPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
