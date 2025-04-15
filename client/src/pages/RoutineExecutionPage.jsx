@@ -3,27 +3,26 @@
 import { useState } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { CheckCircle, ArrowLeft, Trophy } from "lucide-react"
+import axios from "axios"
+import { toast } from "react-toastify"
 
 export default function RoutineExecutionPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const { routineId } = useParams()
-  
-  // 실제로는 API에서 루틴 정보를 가져올 것입니다
+
   const [routine, setRoutine] = useState(
     location.state?.routine || {
       id: Number.parseInt(routineId) || 1,
       title: "",
       exercises: [],
     }
-  );
+  )
 
-  // 완료된 운동 수 계산
   const completedExercises = routine.exercises.filter((ex) => ex.isCompleted).length
   const totalExercises = routine.exercises.length
   const allCompleted = completedExercises === totalExercises
 
-  // 격려 메시지 생성
   const getEncouragementMessage = () => {
     const percentage = (completedExercises / totalExercises) * 100
 
@@ -33,38 +32,47 @@ export default function RoutineExecutionPage() {
     return "대단해요! 모든 운동을 완료했습니다!"
   }
 
-  // 운동 완료 상태 토글
   const toggleExerciseCompletion = (exerciseId) => {
-    setRoutine({
-      ...routine,
-      exercises: routine.exercises.map((exercise) =>
-        exercise.id === exerciseId ? { ...exercise, isCompleted: !exercise.isCompleted } : exercise,
+    setRoutine((prev) => ({
+      ...prev,
+      exercises: prev.exercises.map((exercise) =>
+        (exercise.id === exerciseId || exercise._id === exerciseId)
+          ? { ...exercise, isCompleted: !exercise.isCompleted }
+          : exercise
       ),
-    })
+    }))
   }
 
-  // 루틴 완료 처리
-  const handleCompleteRoutine = () => {
-    // 실제로는 여기서 API를 통해 완료된 루틴을 저장합니다
-    console.log("루틴 완료:", routine)
+  const handleCompleteRoutine = async () => {
+    const token = localStorage.getItem("token");
+  
+    try {
+      await axios.post("/api/routines/history", {
+        title: routine.title,
+        exercises: routine.exercises,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+  
+      navigate("/main", {
+        state: {
+          routineCompleted: true,
+          routineTitle: routine.title,
+        },
+      });
+    } catch (err) {
+      console.error("루틴 기록 저장 실패:", err);
+      toast.error("루틴 저장 중 문제가 발생했습니다.");
+    }
+  };
+  
 
-    // 메인 페이지로 이동
-    navigate("/main", {
-      state: {
-        routineCompleted: true,
-        routineTitle: routine.title,
-      },
-    })
-  }
-
-  // 취소 처리
   const handleCancel = () => {
     navigate("/main")
   }
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center mb-4">
           <button onClick={handleCancel} className="p-2 rounded-full hover:bg-gray-100 mr-2">
@@ -84,7 +92,6 @@ export default function RoutineExecutionPage() {
             </p>
           </div>
 
-          {/* 진행 상태 바 */}
           <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
             <div
               className="h-2.5 rounded-full"
@@ -97,11 +104,10 @@ export default function RoutineExecutionPage() {
         </div>
       </div>
 
-      {/* 운동 목록 */}
       <div className="space-y-4">
         {routine.exercises.map((exercise) => (
           <div
-            key={exercise.id}
+            key={exercise.id || exercise._id}
             className={`p-4 rounded-lg border transition-colors ${
               exercise.isCompleted ? "border-green-200 bg-green-50" : "border-gray-200 bg-white"
             }`}
@@ -116,7 +122,7 @@ export default function RoutineExecutionPage() {
                 </p>
               </div>
               <button
-                onClick={() => toggleExerciseCompletion(exercise.id)}
+                onClick={() => toggleExerciseCompletion(exercise.id || exercise._id)}
                 className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   exercise.isCompleted
                     ? "bg-green-100 text-green-700 hover:bg-green-200"
@@ -125,8 +131,7 @@ export default function RoutineExecutionPage() {
               >
                 {exercise.isCompleted ? (
                   <>
-                    <CheckCircle size={16} className="mr-1.5" />
-                    완료됨
+                    <CheckCircle size={16} className="mr-1.5" /> 완료됨
                   </>
                 ) : (
                   "운동 완료"
@@ -137,7 +142,6 @@ export default function RoutineExecutionPage() {
         ))}
       </div>
 
-      {/* 하단 버튼 */}
       <div className="flex flex-col space-y-3 pt-4">
         <button
           onClick={handleCompleteRoutine}
@@ -145,8 +149,7 @@ export default function RoutineExecutionPage() {
             allCompleted ? "bg-green-600 hover:bg-green-700" : "bg-[#6ca7af] hover:bg-[#5a8f96]"
           }`}
         >
-          {allCompleted && <Trophy size={18} className="mr-2" />}
-          오늘의 루틴 완료!
+          {allCompleted && <Trophy size={18} className="mr-2" />} 오늘의 루틴 완료!
         </button>
         <button
           onClick={handleCancel}

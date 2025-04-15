@@ -132,7 +132,7 @@ export default function MainPage() {
                   </ul>
                 </div>
                 <button
-                  onClick={() => handleStartRoutine(routine.id)}
+                  onClick={() => handleStartRoutine(routine)}
                   className="w-full mt-3 px-3 py-2 rounded-md text-white text-sm font-medium transition-colors flex items-center justify-center"
                   style={{ backgroundColor: "#6ca7af" }}
                 >

@@ -1,4 +1,5 @@
 const UserRoutine = require('../models/UserRoutine');
+const DailyRoutine = require("../models/Routine");
 
 const getMyRoutines = async (req, res) => {
   try {
@@ -52,9 +53,39 @@ const updateRoutine = async (req, res) => {
   }
 };
 
+const saveRoutineHistory = async (req, res) => {
+  const userId = req.user.id;
+  const { title, exercises } = req.body;
+
+  const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+
+  try {
+    let record = await DailyRoutine.findOne({ userId, date: today });
+
+    const newRoutine = { title, exercises };
+
+    if (record) {
+      record.routines.push(newRoutine);
+      await record.save();
+    } else {
+      await DailyRoutine.create({
+        userId,
+        date: today,
+        routines: [newRoutine],
+      });
+    }
+
+    res.status(200).json({ message: "루틴 기록 저장 완료" });
+  } catch (error) {
+    console.error("기록 저장 실패:", error);
+    res.status(500).json({ message: "루틴 기록 저장 중 오류 발생" });
+  }
+};
+
 module.exports = {
   getMyRoutines,
   createRoutine,
   deleteRoutine,
-  updateRoutine
+  updateRoutine,
+  saveRoutineHistory
 };
