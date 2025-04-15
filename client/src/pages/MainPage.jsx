@@ -34,7 +34,7 @@ export default function MainPage() {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/auth/me", {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -66,7 +66,7 @@ export default function MainPage() {
   const fetchUserRoutines = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/api/routines", {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/routines`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

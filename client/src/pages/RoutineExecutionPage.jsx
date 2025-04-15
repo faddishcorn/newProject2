@@ -47,7 +47,7 @@ export default function RoutineExecutionPage() {
     const token = localStorage.getItem("token");
   
     try {
-      await axios.post("/api/routines/history", {
+      await axios.post(`${import.meta.env.VITE_API_BASE}/api/routines/history`, {
         title: routine.title,
         exercises: routine.exercises,
       }, {

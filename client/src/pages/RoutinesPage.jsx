@@ -35,7 +35,7 @@ export default function RoutinesPage() {
     const fetchSavedRoutines = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/routines", {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/routines`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -59,7 +59,7 @@ export default function RoutinesPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "/api/gpt/generate-routine",
+        `${import.meta.env.VITE_API_BASE}/api/gpt/generate-routine`,
         { prompt: promptInput },
         {
           headers: {
@@ -119,7 +119,7 @@ export default function RoutinesPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `/api/routines/${routine._id}`,
+        `${import.meta.env.VITE_API_BASE}/api/routines/${routine._id}`,
         {
           title: routine.title,
           exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
@@ -143,7 +143,7 @@ export default function RoutinesPage() {
   const handleDeleteRoutine = async (routineId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`/api/routines/${routineId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/routines/${routineId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSavedRoutines(savedRoutines.filter((routine) => routine._id !== routineId));
@@ -166,7 +166,7 @@ const handleCreateRoutine = async (routine) => {
   try {
     const token = localStorage.getItem("token");
     const res = await axios.post(
-      "/api/routines",
+      `${import.meta.env.VITE_API_BASE}/api/routines`,
       {
         title: routine.title,
         exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
