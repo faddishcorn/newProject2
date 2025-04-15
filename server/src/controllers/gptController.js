@@ -29,7 +29,7 @@ const generateRoutine = async (req, res) => {
 ]
 \`\`\`
 
-만약 운동 및 운동루틴과 관련 없는 요청이라면:
+만약 운동 및 운동루틴과 완전히 관련 없는 요청이라면 (개인적 상황 등 어느정도의 타 주제 및 내용은 루틴생성에 반영해야 합니다.):
 \`\`\`json
 { "message": "운동 루틴과 관련된 내용을 입력해주세요." }
 \`\`\`
@@ -68,7 +68,7 @@ const generateRoutine = async (req, res) => {
 
   } catch (error) {
     console.error("GPT 호출 실패:", error.response?.data || error.message);
-    res.status(500).json({ message: "GPT 요청 중 오류 발생" });
+    res.status(500).json({ message: "요청 중 오류 발생" });
   }
 };
 
