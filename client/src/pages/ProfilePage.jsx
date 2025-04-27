@@ -198,7 +198,7 @@ export default function ProfilePage() {
         formData.append('avatarDelete', true); // ✅ 삭제 요청 신호
       }
   
-      await axios.put(`/api/users/profile`, {
+      await axios.put(`/api/users/profile`, formData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',
