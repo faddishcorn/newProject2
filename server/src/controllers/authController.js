@@ -48,7 +48,7 @@ const login = async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // 배포환경에서만 secure 적용
-      sameSite: 'Strict', // CSRF 방어용
+      sameSite: 'None',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
     });
 
