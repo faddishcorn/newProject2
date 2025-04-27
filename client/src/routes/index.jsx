@@ -7,6 +7,9 @@ import PrivateRoute from "./PrivateRoute"
 import MainLayout from '../layouts/MainLayout';
 import RoutinesPage from '../pages/RoutinesPage';
 import RoutineExecutionPage from '../pages/RoutineExecutionPage';
+import SocialPage from '../pages/SocialPage';
+import ProfilePage from '../pages/ProfilePage';
+import WorkoutLogPage from '../pages/WorkoutLogPage';
 
 export default function AppRoutes() {
   return (
@@ -26,6 +29,10 @@ export default function AppRoutes() {
           <Route path="/main" element={<MainPage />} />
           <Route path="/routines" element={<RoutinesPage/>}/>
           <Route path="routine-execution/:routineId" element={<RoutineExecutionPage />} />
+          <Route path="/social" element={<SocialPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="workout-logs" element={<WorkoutLogPage />} />
+          <Route path="workout-logs/:userId" element={<WorkoutLogPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

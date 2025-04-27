@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const signup = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, height, weight, gender, birthdate } = req.body;
 
   try {
     // 사용자 중복 확인
@@ -19,6 +19,10 @@ const signup = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      height,
+      weight,
+      gender,
+      birthdate,
     });
 
     await newUser.save();

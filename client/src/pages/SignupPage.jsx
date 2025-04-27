@@ -31,10 +31,6 @@ export default function SignupPage() {
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE}/api/auth/signup`, form);
       setMessage(res.data.message);
-//       setMessage("회원가입 성공! 로그인 페이지로 이동합니다...");
-// setTimeout(() => {
-//   navigate("/login");
-// }, 1000);
 navigate("/login");
     } catch (err) {
       setMessage(err.response?.data?.message || '회원가입 실패');
