@@ -33,7 +33,9 @@ const handleSubmit = async (e) => {
 useEffect(() => {
   const checkLogin = async () => {
     try {
-      await axios.get('/api/auth/me'); // ✅ withCredentials 자동 적용되어있음
+      await axios.get('/api/auth/me', {
+        withCredentials: true,
+      });
       navigate('/main'); // 로그인 되어있으면 메인으로 이동
     } catch (error) {
       // 401 에러는 로그인 안 된 거니까 무시하고 그냥 로그인 페이지 보여주면 됨
