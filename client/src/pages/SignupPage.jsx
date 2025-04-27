@@ -188,15 +188,16 @@ navigate("/login");
   {/* 이용약관 */}
   <div className="space-y-2">
     <div className="flex items-center space-x-2">
-      <input
+      {/* <input
         id="terms"
         type="checkbox"
         className="h-4 w-4 rounded border-gray-300 text-primary"
         required
-      />
+      /> */}
       <label htmlFor="terms" className="text-sm text-muted-foreground">
-        <a href="/terms" className="text-primary underline hover:underline-offset-4">이용약관</a> 및{" "}
-        <a href="/privacy" className="text-primary underline hover:underline-offset-4">개인정보 처리방침</a>에 동의합니다.
+        신체 정보는 보다 정확한 루틴 추천을 위해 이용되며 타인이 확인할 수 없습니다. 추후에 변경이 가능합니다.
+        {/* <a href="/terms" className="text-primary underline hover:underline-offset-4">이용약관</a> 및{" "}
+        <a href="/privacy" className="text-primary underline hover:underline-offset-4">개인정보 처리방침</a>에 동의합니다. */}
       </label>
     </div>
   </div>

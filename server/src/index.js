@@ -8,11 +8,16 @@ const routineRoutes = require('./routes/routineRoutes');
 const socialRoutes = require('./routes/socialRoutes');
 const userRoutes = require('./routes/userRoutes');
 const workoutLogRoutes = require('./routes/workoutLogRoutes');
+const cookieParser = require('cookie-parser');
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // origin 주소
+  credentials: true, // 쿠키 허용
+}));
 app.use(express.json());
 app.use('/api/gpt', gptRoutes);
 app.use('/api/auth', authRoutes);

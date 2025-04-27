@@ -40,10 +40,7 @@ export default function ProfilePage() {
       try {
         setIsLoading(true);
     
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/users/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(`/api/users/profile`);
     
         const userData = res.data;
     
@@ -120,18 +117,12 @@ export default function ProfilePage() {
   // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
     try {
-      const token = localStorage.getItem("token");
-  
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/users/account`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.delete(`/api/users/account`);
   
       console.log("계정이 삭제되었습니다.");
   
       // 토큰 삭제 + 리다이렉트
-      localStorage.removeItem("token");
+      localStorage.removeItem("");
       window.location.href = '/login'; // 로그인 페이지로 이동
   
       setShowDeleteConfirm(false);
@@ -207,14 +198,7 @@ export default function ProfilePage() {
         formData.append('avatarDelete', true); // ✅ 삭제 요청 신호
       }
   
-      const token = localStorage.getItem("token");
-  
-      await axios.put(`${import.meta.env.VITE_API_BASE}/api/users/profile`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await axios.put(`/api/users/profile`);
   
       // setSuccessMessage("프로필이 성공적으로 업데이트되었습니다.");
       toast.success("프로필이 업데이트되었습니다.");
@@ -323,7 +307,7 @@ export default function ProfilePage() {
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                 <User className="inline-block w-4 h-4 mr-1" />
-                사용자 이름
+                닉네임
               </label>
               <input
                 id="username"

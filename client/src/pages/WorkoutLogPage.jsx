@@ -49,26 +49,15 @@ export default function WorkoutLogPage() {
     const init = async () => {
       try {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
-  
-        if (!token) {
-          console.error('토큰이 없습니다.');
-          setIsLoading(false);
-          return;
-        }
   
         // ✅ 무조건 내 정보 가져오기
-        const resMe = await axios.get(`${import.meta.env.VITE_API_BASE}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resMe = await axios.get(`/api/auth/me`);
         const meData = resMe.data;
         setCurrentUserId(meData._id);
   
         if (userId) {
           // ✅ 타인 프로필 조회
-          const resUser = await axios.get(`${import.meta.env.VITE_API_BASE}/api/users/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          const resUser = await axios.get(`/api/users/${userId}`);
   
           const userData = resUser.data;
           userData.id = userData._id; // id 세팅
@@ -107,13 +96,10 @@ export default function WorkoutLogPage() {
     const fetchRoutinesOnDateChange = async () => {
       try {
         if (!user) return; // 아직 유저 정보 없으면 패스
-        const token = localStorage.getItem('token');
         const formattedDate = formatDate(selectedDate);
         const targetId = userId || user._id;
   
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/workout-logs/${targetId}/${formattedDate}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(`/api/workout-logs/${targetId}/${formattedDate}`);
   
         setDailyRoutines(res.data);
       } catch (error) {
@@ -189,12 +175,10 @@ export default function WorkoutLogPage() {
   
     try {
       setIsSubmittingComment(true);
-      const token = localStorage.getItem('token');
   
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE}/api/workout-logs/${user._id}/comments`,
-        { content: newComment },
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/api/workout-logs/${user._id}/comments`,
+        { content: newComment }
       );
       setComments([...comments, res.data]);
       setNewComment("");
@@ -229,13 +213,11 @@ export default function WorkoutLogPage() {
   // 댓글 수정 저장
   const handleSaveEdit = async (commentId) => {
     if (!editedCommentText.trim()) return;
-    const token = localStorage.getItem('token')
     try {
       setIsSubmittingComment(true);
       await axios.put(
-        `${import.meta.env.VITE_API_BASE}/api/workout-logs/comments/${commentId}`,
-        { content: editedCommentText },
-        { headers: { Authorization: `Bearer ${token}` } }
+        `/api/workout-logs/comments/${commentId}`,
+        { content: editedCommentText }
       );
 
       const updated = comments.map((comment) =>
@@ -254,13 +236,9 @@ export default function WorkoutLogPage() {
   // 댓글 삭제
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
-    const token = localStorage.getItem('token')
     try {
       setIsLoadingComments(true);
-      await axios.delete(
-        `${import.meta.env.VITE_API_BASE}/api/workout-logs/comments/${commentId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.delete(`/api/workout-logs/comments/${commentId}`);
       setComments(comments.filter((c) => c.id !== commentId));
       setIsLoadingComments(false);
     } catch (error) {

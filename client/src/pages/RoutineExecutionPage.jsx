@@ -44,14 +44,10 @@ export default function RoutineExecutionPage() {
   }
 
   const handleCompleteRoutine = async () => {
-    const token = localStorage.getItem("token");
-  
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE}/api/routines/history`, {
+      await axios.post('/api/routines/history', {
         title: routine.title,
         exercises: routine.exercises,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
   
       navigate("/main", {

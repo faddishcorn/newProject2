@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Home, Users, Calendar, User, BarChart2, Menu, X, LogOut } from "lucide-react"
+import axios from 'axios'
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -21,11 +22,15 @@ export default function Navbar() {
     return location.pathname === path
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    console.log("로그아웃")
-    navigate("/")
-  }
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/auth/logout'); // ✅ 서버에 로그아웃 요청
+      console.log('로그아웃 완료');
+      navigate('/login'); // 로그인 페이지로 이동
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full" style={{ backgroundColor: "#6ca7af" }}>

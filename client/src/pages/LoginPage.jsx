@@ -19,10 +19,10 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     const res = await axios.post(`${import.meta.env.VITE_API_BASE}/api/auth/login`, form); // 로그인 요청
-    const { token } = res.data;
+    // const { token } = res.data;
 
-    // 로그인 성공 시 토큰 저장
-    localStorage.setItem("token", token);
+    // // 로그인 성공 시 토큰 저장
+    // localStorage.setItem("token", token);
 
     // 메인 페이지로 이동
     navigate("/main");
@@ -31,10 +31,19 @@ const handleSubmit = async (e) => {
   }
 };
 useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    navigate("/main"); // 로그인된 유저는 로그인 페이지 진입 불가
-  }
+  const checkLogin = async () => {
+    try {
+      await axios.get('/api/auth/me'); // ✅ withCredentials 자동 적용되어있음
+      navigate('/main'); // 로그인 되어있으면 메인으로 이동
+    } catch (error) {
+      // 401 에러는 로그인 안 된 거니까 무시하고 그냥 로그인 페이지 보여주면 됨
+      if (error.response && error.response.status !== 401) {
+        console.error("로그인 상태 확인 실패:", error);
+      }
+    }
+  };
+
+  checkLogin();
 }, []);
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">

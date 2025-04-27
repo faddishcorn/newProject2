@@ -17,13 +17,6 @@ export default function SocialPage() {
   const [searchResults, setSearchResults] = useState([]) //
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token")
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-
   useEffect(() => {
     fetchAll()
   }, [])
@@ -31,10 +24,10 @@ export default function SocialPage() {
   const fetchAll = async () => {
     try {
       const [fRes, frRes, srRes, rrRes] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/followings`, authHeader),
-        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/followers`, authHeader),
-        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/requests/sent`, authHeader),
-        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/requests/received`, authHeader),
+        axios.get(`/api/social/followings`),
+        axios.get(`/api/social/followers`),
+        axios.get(`/api/social/requests/sent`),
+        axios.get(`/api/social/requests/received`),
       ])
       setFollowings(fRes.data)
       setFollowers(frRes.data)

@@ -34,12 +34,7 @@ export default function RoutinesPage() {
   useEffect(() => {
     const fetchSavedRoutines = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/routines`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const res = await axios.get(`/api/routines`);
         setSavedRoutines(res.data);
       } catch (err) {
         console.error("루틴 목록 불러오기 실패:", err);
@@ -57,17 +52,9 @@ export default function RoutinesPage() {
     setError(null); // 이전 에러 초기화
   
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE}/api/gpt/generate-routine`,
-        { prompt: promptInput },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
+        `/api/gpt/generate-routine`,
+        { prompt: promptInput },);
   
       if (!res.data || !Array.isArray(res.data)) {
         throw new Error("루틴 형식이 잘못되었습니다.");
@@ -117,17 +104,12 @@ export default function RoutinesPage() {
 
   const handleUpdateRoutine = async (routine) => {
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.put(
-        `${import.meta.env.VITE_API_BASE}/api/routines/${routine._id}`,
+        `/api/routines/${routine._id}`,
         {
           title: routine.title,
           exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        });
   
       const updated = savedRoutines.map((r) => (r._id === res.data._id ? res.data : r));
       setSavedRoutines(updated);
@@ -142,10 +124,7 @@ export default function RoutinesPage() {
 
   const handleDeleteRoutine = async (routineId) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/routines/${routineId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/api/routines/${routineId}`);
       setSavedRoutines(savedRoutines.filter((routine) => routine._id !== routineId));
     } catch (err) {
       console.error("루틴 삭제 실패:", err);
@@ -164,17 +143,12 @@ const handleSaveRoutine = (routine) => {
   // 루틴 저장 (새 루틴용)
 const handleCreateRoutine = async (routine) => {
   try {
-    const token = localStorage.getItem("token");
     const res = await axios.post(
-      `${import.meta.env.VITE_API_BASE}/api/routines`,
+      `/api/routines`,
       {
         title: routine.title,
         exercises: routine.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+      });
 
     setSavedRoutines([res.data, ...savedRoutines]);
     setGeneratedRoutine(null);
@@ -388,7 +362,7 @@ const handleRoutineTitleChange = (e, isNew = false) => {
       <div className="bg-white rounded-lg shadow-sm p-8 flex flex-col items-center">
         <h2 className="text-xl font-semibold text-gray-800 mb-6">오늘은 어떤 운동을 해볼까요?</h2>
         <p className="text-gray-600 mb-6 text-center max-w-2xl">
-          원하는 운동 루틴을 자연어로 설명해보세요. 예: "30분 동안 할 수 있는 상체 위주의 홈트레이닝 루틴 추천해줘"
+          원하는 운동 루틴을 자연어로 아주 자유롭게 설명해보세요. 예: "상체는 헬스장, 하체는 홈트 루틴으로 섞어서1시간분량 루틴 추천해줘"
         </p>
 
         <form onSubmit={handlePromptSubmit} className="w-full max-w-2xl">

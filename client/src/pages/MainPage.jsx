@@ -33,12 +33,7 @@ export default function MainPage() {
 
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const res = await axios.get(`/api/auth/me`);
         setUserName(res.data.username); 
       } catch (err) {
         console.error("사용자 정보 불러오기 실패", err);
@@ -65,12 +60,7 @@ export default function MainPage() {
   useEffect(() => {
   const fetchUserRoutines = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/routines`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/routines`);
       setRecommendedRoutines(res.data);  // 백엔드에서 온 루틴으로 상태 갱신
     } catch (err) {
       console.error("루틴 목록 불러오기 실패:", err);
