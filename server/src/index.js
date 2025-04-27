@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const gptRoutes = require('./routes/gptRoutes');
 const routineRoutes = require('./routes/routineRoutes');
@@ -18,6 +19,10 @@ app.use(cors({
   origin: process.env.FRONTEND_URL, // origin 주소
   credentials: true, // 쿠키 허용
 }));
+app.use('/uploads', cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+}), express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
 app.use('/api/gpt', gptRoutes);
 app.use('/api/auth', authRoutes);
