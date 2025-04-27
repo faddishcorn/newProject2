@@ -9,6 +9,12 @@ const userSchema = new mongoose.Schema({
   weight:   { type: Number },
   gender:   { type: String },
   birthdate:{ type: Date },
+  avatar:   { type: String },
+  isPrivate: { type: Boolean, default: false }, 
+  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
