@@ -31,10 +31,10 @@ export default function SocialPage() {
   const fetchAll = async () => {
     try {
       const [fRes, frRes, srRes, rrRes] = await Promise.all([
-        axios.get("/api/social/followings", authHeader),
-        axios.get("/api/social/followers", authHeader),
-        axios.get("/api/social/requests/sent", authHeader),
-        axios.get("/api/social/requests/received", authHeader),
+        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/followings`, authHeader),
+        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/followers`, authHeader),
+        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/requests/sent`, authHeader),
+        axios.get(`${import.meta.env.VITE_API_BASE}/api/social/requests/received`, authHeader),
       ])
       setFollowings(fRes.data)
       setFollowers(frRes.data)
