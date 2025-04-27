@@ -198,7 +198,12 @@ export default function ProfilePage() {
         formData.append('avatarDelete', true); // ✅ 삭제 요청 신호
       }
   
-      await axios.put(`/api/users/profile`);
+      await axios.put(`/api/users/profile`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
   
       // setSuccessMessage("프로필이 성공적으로 업데이트되었습니다.");
       toast.success("프로필이 업데이트되었습니다.");
