@@ -53,7 +53,8 @@ router.put('/profile', authMiddleware, upload.single('avatar'), async (req, res)
 
     // 파일이 있을 때만 avatar 업데이트
     if (req.file) {
-      user.avatar = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      user.avatar = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
     }
     if (req.body.avatarDelete === 'true') {
       user.avatar = null;
