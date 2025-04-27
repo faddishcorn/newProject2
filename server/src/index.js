@@ -5,6 +5,9 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const gptRoutes = require('./routes/gptRoutes');
 const routineRoutes = require('./routes/routineRoutes');
+const socialRoutes = require('./routes/socialRoutes');
+const userRoutes = require('./routes/userRoutes');
+const workoutLogRoutes = require('./routes/workoutLogRoutes');
 
 dotenv.config();
 
@@ -17,6 +20,10 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 app.use('/api/routines', routineRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/uploads', express.static('uploads'));
+app.use('/api/users', userRoutes);
+app.use('/api/workout-logs', workoutLogRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
