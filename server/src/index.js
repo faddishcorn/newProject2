@@ -15,15 +15,19 @@ dotenv.config();
 
 const app = express();
 app.use(cookieParser());
+
 app.use(cors({
   origin: process.env.FRONTEND_URL, // origin 주소
   credentials: true, // 쿠키 허용
 }));
+
 app.use('/uploads', cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
 }), express.static(path.join(__dirname, 'uploads')));
+
 app.use(express.json());
+
 app.use('/api/gpt', gptRoutes);
 app.use('/api/auth', authRoutes);
 app.get('/', (req, res) => {
@@ -31,7 +35,6 @@ app.get('/', (req, res) => {
 });
 app.use('/api/routines', routineRoutes);
 app.use('/api/social', socialRoutes);
-app.use('/uploads', express.static('uploads'));
 app.use('/api/users', userRoutes);
 app.use('/api/workout-logs', workoutLogRoutes);
 
