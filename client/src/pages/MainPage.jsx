@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { Activity, TrendingUp, ArrowRight, Plus } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import axios from "axios"
+import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function MainPage() {
   const [greeting, setGreeting] = useState("")
@@ -14,6 +16,7 @@ export default function MainPage() {
   const [showCompletionMessage, setShowCompletionMessage] = useState(false)
   const [completedRoutineTitle, setCompletedRoutineTitle] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  // const [errorMessage, setErrorMessage] = useState("")
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -38,11 +41,12 @@ export default function MainPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`/api/auth/me`)
+        const res = await axiosInstance.get(`/api/auth/me`)
         setUserName(res.data.username)
         setUserId(res.data._id)
       } catch (err) {
         console.error("사용자 정보 불러오기 실패", err)
+        toast.error("사용자 정보 불러오기 실패, 다시 시도해주세요😥");
       }
     }
     fetchUser()
@@ -54,7 +58,7 @@ export default function MainPage() {
       if (!userId) return; // 아직 userId를 못 불러왔으면 대기
 
       try {
-        const res = await axios.get(`/api/workout-logs/dates/${userId}`)
+        const res = await axiosInstance.get(`/api/workout-logs/dates/${userId}`)
         const dates = res.data
 
         const startOfWeek = new Date(today)
@@ -85,7 +89,7 @@ export default function MainPage() {
   useEffect(() => {
     const fetchRecommendedRoutines = async () => {
       try {
-        const res = await axios.get(`/api/routines`)
+        const res = await axiosInstance.get(`/api/routines`)
         setRecommendedRoutines(res.data)
       } catch (err) {
         console.error("루틴 목록 불러오기 실패", err)
@@ -122,6 +126,15 @@ export default function MainPage() {
       </div>
     )
   }
+
+  // if (errorMessage) {
+  //   return (
+  //     <div className="flex flex-col justify-center items-center h-screen space-y-4">
+  //       <p className="text-black-500 text-lg font-semibold">{errorMessage}</p>
+  //       <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[#6ca7af] text-white rounded-md">다시 시도</button>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="space-y-8">

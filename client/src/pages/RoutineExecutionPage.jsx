@@ -5,6 +5,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { CheckCircle, ArrowLeft, Trophy } from "lucide-react"
 import axios from "axios"
 import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function RoutineExecutionPage() {
   const location = useLocation()
@@ -45,7 +46,7 @@ export default function RoutineExecutionPage() {
 
   const handleCompleteRoutine = async () => {
     try {
-      await axios.post('/api/routines/history', {
+      await axiosInstance.post('/api/routines/history', {
         title: routine.title,
         exercises: routine.exercises,
       });

@@ -5,6 +5,7 @@ import { Camera, Save, Eye, EyeOff, Lock, Mail, User, Calendar, Ruler, Weight, U
 import DefaultAvatar from "../components/DefaultAvatar"
 import axios from "axios"
 import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function ProfilePage() {
   // 사용자 정보 상태
@@ -40,7 +41,7 @@ export default function ProfilePage() {
       try {
         setIsLoading(true);
     
-        const res = await axios.get(`/api/users/profile`);
+        const res = await axiosInstance.get(`/api/users/profile`);
     
         const userData = res.data;
     
@@ -60,6 +61,7 @@ export default function ProfilePage() {
         setIsLoading(false);
       } catch (error) {
         console.error("사용자 정보를 가져오는 중 오류 발생:", error);
+        toast.error("사용자 정보를 가져오는 중 오류 발생");
         setIsLoading(false);
       }
     }
@@ -117,7 +119,7 @@ export default function ProfilePage() {
   // 회원 탈퇴 처리
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete(`/api/users/account`);
+      await axiosInstance.delete(`/api/users/account`);
   
       console.log("계정이 삭제되었습니다.");
   
@@ -198,7 +200,7 @@ export default function ProfilePage() {
         formData.append('avatarDelete', true); // ✅ 삭제 요청 신호
       }
   
-      await axios.put(`/api/users/profile`, formData, {
+      await axiosInstance.put(`/api/users/profile`, formData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',

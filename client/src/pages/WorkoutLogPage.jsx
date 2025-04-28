@@ -20,6 +20,8 @@ import {
 } from "lucide-react"
 import DefaultAvatar from "../components/DefaultAvatar"
 import axios from "axios";
+import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function WorkoutLogPage() {
   const { userId } = useParams()
@@ -51,13 +53,13 @@ export default function WorkoutLogPage() {
         setIsLoading(true);
   
         // ✅ 무조건 내 정보 가져오기
-        const resMe = await axios.get(`/api/auth/me`);
+        const resMe = await axiosInstance.get(`/api/auth/me`);
         const meData = resMe.data;
         setCurrentUserId(meData._id);
   
         if (userId) {
           // ✅ 타인 프로필 조회
-          const resUser = await axios.get(`/api/users/${userId}`);
+          const resUser = await axiosInstance.get(`/api/users/${userId}`);
   
           const userData = resUser.data;
           userData.id = userData._id; // id 세팅
@@ -99,11 +101,12 @@ export default function WorkoutLogPage() {
         const formattedDate = formatDate(selectedDate);
         const targetId = userId || user._id;
   
-        const res = await axios.get(`/api/workout-logs/${targetId}/${formattedDate}`);
+        const res = await axiosInstance.get(`/api/workout-logs/${targetId}/${formattedDate}`);
   
         setDailyRoutines(res.data);
       } catch (error) {
         console.error('선택 날짜 운동 기록 조회 실패', error);
+        toast.error("운동 기록 조회 실패, 다시 시도해주세요😥");
         setDailyRoutines([]);
       }
     };
@@ -115,7 +118,7 @@ export default function WorkoutLogPage() {
   
   const fetchDatesWithWorkouts = async (targetId) => {
     try {
-      const res = await axios.get(`/api/workout-logs/dates/${targetId}`);
+      const res = await axiosInstance.get(`/api/workout-logs/dates/${targetId}`);
       setDatesWithWorkouts(res.data);
     } catch (error) {
       console.error("운동 날짜 조회 실패", error);
@@ -126,7 +129,7 @@ export default function WorkoutLogPage() {
   const fetchDailyRoutines = async (date, targetId) => {
     try {
       const formattedDate = formatDate(date);
-      const res = await axios.get(`/api/workout-logs/${targetId}/${formattedDate}`);
+      const res = await axiosInstance.get(`/api/workout-logs/${targetId}/${formattedDate}`);
       setDailyRoutines(res.data);
     } catch (error) {
       console.error("운동 기록 조회 실패", error);
@@ -138,7 +141,7 @@ export default function WorkoutLogPage() {
   const fetchComments = async (targetId) => {
     try {
       setIsLoadingComments(true);
-      const res = await axios.get(`/api/workout-logs/${targetId}/comments`);
+      const res = await axiosInstance.get(`/api/workout-logs/${targetId}/comments`);
       setComments(res.data);
       setIsLoadingComments(false);
     } catch (error) {
@@ -163,7 +166,7 @@ export default function WorkoutLogPage() {
     try {
       setIsSubmittingComment(true);
   
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         `/api/workout-logs/${user._id}/comments`,
         { content: newComment }
       );
@@ -202,7 +205,7 @@ export default function WorkoutLogPage() {
     if (!editedCommentText.trim()) return;
     try {
       setIsSubmittingComment(true);
-      await axios.put(
+      await axiosInstance.put(
         `/api/workout-logs/comments/${commentId}`,
         { content: editedCommentText }
       );
@@ -225,7 +228,7 @@ export default function WorkoutLogPage() {
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
     try {
       setIsLoadingComments(true);
-      await axios.delete(`/api/workout-logs/comments/${commentId}`);
+      await axiosInstance.delete(`/api/workout-logs/comments/${commentId}`);
       setComments(comments.filter((c) => c.id !== commentId));
       setIsLoadingComments(false);
     } catch (error) {

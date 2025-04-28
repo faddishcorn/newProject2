@@ -6,6 +6,7 @@ import Button from "../components/Button"
 import logo from "../assets/logo.png"
 import axios from 'axios';
 import { useNavigate } from "react-router-dom"
+import axiosInstance from '../api/axiosInstance';
 
 export default function SignupPage() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function SignupPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE}/api/auth/signup`, form);
+      const res = await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/auth/signup`, form);
       setMessage(res.data.message);
 navigate("/login");
     } catch (err) {

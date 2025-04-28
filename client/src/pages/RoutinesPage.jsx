@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import RoutineEditor from "../components/RoutineEditor"
 import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function RoutinesPage() {
   const [promptInput, setPromptInput] = useState("")
@@ -34,10 +35,11 @@ export default function RoutinesPage() {
   useEffect(() => {
     const fetchSavedRoutines = async () => {
       try {
-        const res = await axios.get(`/api/routines`);
+        const res = await axiosInstance.get(`/api/routines`);
         setSavedRoutines(res.data);
       } catch (err) {
         console.error("루틴 목록 불러오기 실패:", err);
+        toast.error("루틴 목록 불러오기 실패, 다시 시도해주세요😥");
       }
     };
   
@@ -52,7 +54,7 @@ export default function RoutinesPage() {
     setError(null); // 이전 에러 초기화
   
     try {
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         `/api/gpt/generate-routine`,
         { prompt: promptInput },);
   
@@ -76,7 +78,7 @@ export default function RoutinesPage() {
       console.error("GPT 루틴 생성 실패:", err);
       const message = err.response?.data?.message || "루틴 생성 중 오류가 발생했습니다.";
       setError(message);
-      toast.error(message);
+      toast.error("오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +106,7 @@ export default function RoutinesPage() {
 
   const handleUpdateRoutine = async (routine) => {
     try {
-      const res = await axios.put(
+      const res = await axiosInstance.put(
         `/api/routines/${routine._id}`,
         {
           title: routine.title,
@@ -119,15 +121,17 @@ export default function RoutinesPage() {
       setPromptInput("");
     } catch (err) {
       console.error("루틴 수정 실패:", err);
+      toast.error("루틴 수정 실패, 다시 시도해주세요😥");
     }
   };
 
   const handleDeleteRoutine = async (routineId) => {
     try {
-      await axios.delete(`/api/routines/${routineId}`);
+      await axiosInstance.delete(`/api/routines/${routineId}`);
       setSavedRoutines(savedRoutines.filter((routine) => routine._id !== routineId));
     } catch (err) {
       console.error("루틴 삭제 실패:", err);
+      toast.error("루틴 삭제 실패, 다시 시도해주세요😥");
     }
   };
 
@@ -143,7 +147,7 @@ const handleSaveRoutine = (routine) => {
   // 루틴 저장 (새 루틴용)
 const handleCreateRoutine = async (routine) => {
   try {
-    const res = await axios.post(
+    const res = await axiosInstance.post(
       `/api/routines`,
       {
         title: routine.title,
@@ -158,6 +162,7 @@ const handleCreateRoutine = async (routine) => {
     navigate("/main");
   } catch (err) {
     console.error("루틴 저장 실패:", err);
+    toast.error("루틴 저장 실패, 다시 시도해주세요😥");
   }
 };
 

@@ -3,6 +3,7 @@ import logo from "../assets/logo.png"
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from '../api/axiosInstance';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -30,10 +31,10 @@ export default function LoginPage() {
       //   withCredentials: true,
       // });
 
-      const res = await axios.post(`/api/auth/login`, form);
+      const res = await axiosInstance.post(`/api/auth/login`, form);
       const { token } = res.data;
       localStorage.setItem('token', token);
-      
+
       // 3. 이동
       navigate("/main");
     } catch (err) {

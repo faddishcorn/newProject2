@@ -6,6 +6,7 @@ import axios from "axios"
 import { Search, UserPlus, UserMinus, UserCheck, X, Check, ExternalLink } from "lucide-react"
 import DefaultAvatar from "../components/DefaultAvatar"
 import { toast } from "react-toastify"
+import axiosInstance from '../api/axiosInstance';
 
 export default function SocialPage() {
   const [activeTab, setActiveTab] = useState("following")
@@ -28,10 +29,10 @@ export default function SocialPage() {
       setIsLoading(true);
 
       const [fRes, frRes, srRes, rrRes] = await Promise.all([
-        axios.get(`/api/social/followings`),
-        axios.get(`/api/social/followers`),
-        axios.get(`/api/social/requests/sent`),
-        axios.get(`/api/social/requests/received`),
+        axiosInstance.get(`/api/social/followings`),
+        axiosInstance.get(`/api/social/followers`),
+        axiosInstance.get(`/api/social/requests/sent`),
+        axiosInstance.get(`/api/social/requests/received`),
       ])
       setFollowings(fRes.data)
       setFollowers(frRes.data)
@@ -48,7 +49,7 @@ export default function SocialPage() {
   // 언팔로우 처리
   const handleUnfollow = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
+      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
       fetchAll()
     } catch (err) {
       console.error("언팔로우 실패", err)
@@ -59,7 +60,7 @@ export default function SocialPage() {
   // 요청 취소 처리
   const handleCancelRequest = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
+      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
       fetchAll()
     } catch (err) {
       console.error("요청 취소 실패", err)
@@ -70,7 +71,7 @@ export default function SocialPage() {
   // 팔로워 삭제 처리
   const handleRemoveFollower = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`);
+      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`);
       setFollowers(followers.filter((user) => user._id !== userId)); // ✅ user.id -> user._id
     } catch (err) {
       console.error("팔로워 삭제 실패", err);
@@ -81,7 +82,7 @@ export default function SocialPage() {
   // 팔로워 요청 수락 처리
   const handleAcceptRequest = async (userId) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`, {})
+      await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`, {})
       fetchAll()
     } catch (err) {
       console.error("요청 수락 실패", err)
@@ -92,7 +93,7 @@ export default function SocialPage() {
   // 팔로워 요청 거절 처리
   const handleRejectRequest = async (userId) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`, {})
+      await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`, {})
       fetchAll()
     } catch (err) {
       console.error("요청 거절 실패", err)
@@ -104,7 +105,7 @@ export default function SocialPage() {
   const handleSearch = async (e) => {
     e.preventDefault()
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`)
+      const res = await axiosInstance.get(`${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`)
       setSearchResults(res.data)
       setHasSearched(true)
     } catch (err) {
@@ -117,11 +118,11 @@ export default function SocialPage() {
   const handleToggleFollow = async (userId, status) => {
     try {
       if (status === "none") {
-        await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request`, { targetId: userId })
+        await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request`, { targetId: userId })
       } else if (status === "requested") {
-        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
+        await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
       } else if (status === "following") {
-        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
+        await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
       }
       if (activeTab === "find") {
         handleSearch({ preventDefault: () => {} });
