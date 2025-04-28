@@ -158,11 +158,28 @@ export default function WorkoutLogPage() {
     }
   }
 
+  const detectMaliciousInput = (text) => {
+    const maliciousPatterns = [
+      /<script.*?>.*?<\/script>/gi,  // 스크립트 태그
+      /on\w+=".*?"/gi,               // onclick="..." 같은 이벤트
+      /javascript:/gi,               // javascript: 링크
+      /<iframe.*?>.*?<\/iframe>/gi,   // iframe 삽입
+      /<img.*?onerror=.*?>/gi,        // 이미지 onerror 삽입
+    ];
+    
+    return maliciousPatterns.some((pattern) => pattern.test(text));
+  };
+
   // 댓글 작성 처리
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-  
+    
+    if (detectMaliciousInput(newComment)) {
+      toast.error("악성 코드가 감지되었습니다. 입력을 수정해주세요. 로그기록이 저장되었습니다.");
+      return;
+    }
+
     try {
       setIsSubmittingComment(true);
   
@@ -499,7 +516,7 @@ export default function WorkoutLogPage() {
       </div>
     )
   }
-
+  
   // 댓글 섹션 렌더링
   const renderComments = () => {
     return (

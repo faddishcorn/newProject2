@@ -78,7 +78,7 @@ export default function RoutinesPage() {
       console.error("GPT 루틴 생성 실패:", err);
       const message = err.response?.data?.message || "루틴 생성 중 오류가 발생했습니다.";
       setError(message);
-      toast.error("오류가 발생했습니다.");
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
