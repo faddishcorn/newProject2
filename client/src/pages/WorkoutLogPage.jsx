@@ -115,23 +115,10 @@ export default function WorkoutLogPage() {
   
   const fetchDatesWithWorkouts = async (targetId) => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/workout-logs/dates/${targetId}`);
+      const res = await axios.get(`/api/workout-logs/dates/${targetId}`);
       setDatesWithWorkouts(res.data);
     } catch (error) {
       console.error("운동 날짜 조회 실패", error);
-    }
-  };
-
-  // 페이지 새로고침
-  const handleRefresh = async () => {
-    if (!user) return; // user가 아직 없으면 리턴
-    try {
-      setIsRefreshing(true);
-      await fetchComments(user.id); // 🔥 댓글만 새로 불러오기
-      setIsRefreshing(false);
-    } catch (error) {
-      console.error('댓글 리프레시 실패', error);
-      setIsRefreshing(false);
     }
   };
 
@@ -139,7 +126,7 @@ export default function WorkoutLogPage() {
   const fetchDailyRoutines = async (date, targetId) => {
     try {
       const formattedDate = formatDate(date);
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/workout-logs/${targetId}/${formattedDate}`);
+      const res = await axios.get(`/api/workout-logs/${targetId}/${formattedDate}`);
       setDailyRoutines(res.data);
     } catch (error) {
       console.error("운동 기록 조회 실패", error);
@@ -151,7 +138,7 @@ export default function WorkoutLogPage() {
   const fetchComments = async (targetId) => {
     try {
       setIsLoadingComments(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/workout-logs/${targetId}/comments`);
+      const res = await axios.get(`/api/workout-logs/${targetId}/comments`);
       setComments(res.data);
       setIsLoadingComments(false);
     } catch (error) {

@@ -73,4 +73,8 @@ const getMe = async (req, res) => {
   res.json(user)
 }
 
-module.exports = { signup, login, logout, getMe };
+const ping = (req, res) => {
+  res.status(200).json({ message: 'authenticated' });
+};
+
+module.exports = { signup, login, logout, getMe, ping };
