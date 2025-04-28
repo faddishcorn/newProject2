@@ -26,7 +26,7 @@ export default function Navbar() {
     try {
       await axios.post('/api/auth/logout'); // ✅ 서버에 로그아웃 요청
       console.log('로그아웃 완료');
-      navigate('/login'); // 로그인 페이지로 이동
+      navigate('/'); 
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }

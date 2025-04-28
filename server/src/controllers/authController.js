@@ -63,7 +63,7 @@ const logout = (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'Strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
   });
   res.status(200).json({ message: '로그아웃 성공' });
 };
