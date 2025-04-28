@@ -1,12 +1,18 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-  const token = req.cookies.token; // ✅ 쿠키에서 가져오기!
+  // const token = req.cookies.token; // ✅ 쿠키에서 가져오기!
+  // if (!token) {
+  //   return res.status(401).json({ message: '인증 토큰이 없습니다' });
+  // }
 
-  if (!token) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: '인증 토큰이 없습니다' });
   }
-
+  
+  const token = authHeader.split(' ')[1];
+  
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // ✅ req.user에 디코딩 결과 저장

@@ -45,14 +45,15 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "비밀번호가 일치하지 않습니다." });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // 배포환경에서만 secure 적용
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
-    });
+    // res.cookie('token', token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production', // 배포환경에서만 secure 적용
+    //   sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+    // });
 
-    res.status(200).json({ message: "로그인 성공" });
+    // res.status(200).json({ message: "로그인 성공" });
+    res.status(200).json({ message: "로그인 성공", token }); 
   } catch (err) {
     console.error("로그인 에러:", err);
     res.status(500).json({ message: "서버 오류" });

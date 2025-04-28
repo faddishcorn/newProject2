@@ -20,16 +20,20 @@ export default function LoginPage() {
     setMessage(""); // 제출할 때 기존 메시지 초기화
 
     try {
-      // 1. 로그인 요청
-      await axios.post(`/api/auth/login`, form, {
-        withCredentials: true,
-      });
+      // // 1. 로그인 요청
+      // await axios.post(`/api/auth/login`, form, {
+      //   withCredentials: true,
+      // });
 
-      // 2. ping 요청
-      await axios.get('/api/auth/ping', {
-        withCredentials: true,
-      });
+      // // 2. ping 요청
+      // await axios.get('/api/auth/ping', {
+      //   withCredentials: true,
+      // });
 
+      const res = await axios.post(`/api/auth/login`, form);
+      const { token } = res.data;
+      localStorage.setItem('token', token);
+      
       // 3. 이동
       navigate("/main");
     } catch (err) {

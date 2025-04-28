@@ -7,18 +7,25 @@ export default function PrivateRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        await axios.get('/api/auth/me'); // ✅ withCredentials: true 자동 적용
-        setIsAuthenticated(true);
-      } catch (error) {
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // const checkAuth = async () => {
+    //   try {
+    //     await axios.get('/api/auth/me'); // ✅ withCredentials: true 자동 적용
+    //     setIsAuthenticated(true);
+    //   } catch (error) {
+    //     setIsAuthenticated(false);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
 
-    checkAuth();
+    // checkAuth();
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+    setIsLoading(false);
   }, []);
 
   if (isLoading) {

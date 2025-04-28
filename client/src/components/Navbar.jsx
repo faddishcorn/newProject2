@@ -24,7 +24,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout'); // ✅ 서버에 로그아웃 요청
+      // await axios.post('/api/auth/logout'); // ✅ 서버에 로그아웃 요청
+      localStorage.removeItem('token');
       console.log('로그아웃 완료');
       navigate('/'); 
     } catch (error) {
