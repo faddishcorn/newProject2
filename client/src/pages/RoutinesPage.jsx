@@ -417,8 +417,7 @@ export default function RoutinesPage() {
           오늘은 어떤 운동을 해볼까요?
         </h2>
         <p className="text-gray-600 mb-6 text-center max-w-2xl">
-          원하는 운동 루틴을 자연어로 아주 자유롭게 설명해보세요. 예: "상체는
-          헬스장, 하체는 홈트 루틴으로 섞어서1시간분량 루틴 추천해줘"
+          원하는 운동 루틴을 아주 자유롭게 설명해보세요. 예: "상체는 홈트, 하체는 헬스장 루틴으로 1시간 분량 추천. 스쿼트는 빼고 푸쉬업은 횟수 늘려줘."
         </p>
 
         <form onSubmit={handlePromptSubmit} className="w-full max-w-2xl">
@@ -444,7 +443,7 @@ export default function RoutinesPage() {
             </button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            AI가 입력한 내용을 바탕으로 맞춤형 운동 루틴을 생성합니다.
+            AI가 입력한 내용과 신체정보를 바탕으로 맞춤형 운동 루틴을 생성합니다.
           </p>
         </form>
       </div>
