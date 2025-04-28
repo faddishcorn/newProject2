@@ -10,6 +10,7 @@ const socialRoutes = require('./routes/socialRoutes');
 const userRoutes = require('./routes/userRoutes');
 const workoutLogRoutes = require('./routes/workoutLogRoutes');
 const cookieParser = require('cookie-parser');
+const { sanitizeInput } = require('./middleware/mongo-injection-filter');
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/uploads', cors({
 }), express.static(path.join(__dirname, 'uploads')));
 
 app.use(express.json());
+app.use(sanitizeInput);
 
 app.use('/api/gpt', gptRoutes);
 app.use('/api/auth', authRoutes);
