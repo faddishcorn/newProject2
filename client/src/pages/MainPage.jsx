@@ -172,10 +172,12 @@ export default function MainPage() {
         ) : (
           <div
             onClick={() => navigate("/routines")}
-            className="border border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+            className="border border-dashed border-gray-300 rounded-lg p-8 text-center items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
           >
-            <Plus size={40} className="text-gray-400 mb-4" />
             <div key="no-routine">
+              <div className="flex justify-center">
+                <Plus size={40} className="text-gray-400 mb-4" />
+              </div>
               <p className="text-gray-600 font-medium">루틴이 없습니다</p>
               <p className="text-gray-500 text-sm mt-1">클릭하여 루틴을 추가해보세요</p>
             </div>
