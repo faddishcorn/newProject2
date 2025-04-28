@@ -1,29 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import axios from "axios"
-import { Search, UserPlus, UserMinus, UserCheck, X, Check, ExternalLink } from "lucide-react"
-import DefaultAvatar from "../components/DefaultAvatar"
-import { toast } from "react-toastify"
-import axiosInstance from '../api/axiosInstance';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  Search,
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  X,
+  Check,
+  ExternalLink,
+} from "lucide-react";
+import DefaultAvatar from "../components/DefaultAvatar";
+import { toast } from "react-toastify";
+import axiosInstance from "../api/axiosInstance";
 
 export default function SocialPage() {
-  const [activeTab, setActiveTab] = useState("following")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [hasSearched, setHasSearched] = useState(false)
-  const [followings, setFollowings] = useState([])
-  const [sentRequests, setSentRequests] = useState([])
-  const [followers, setFollowers] = useState([])
-  const [receivedRequests, setReceivedRequests] = useState([])
-  const [searchResults, setSearchResults] = useState([]) 
+  const [activeTab, setActiveTab] = useState("following");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [followings, setFollowings] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [receivedRequests, setReceivedRequests] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAll()
-  }, [])
-  
+    fetchAll();
+  }, []);
+
   const fetchAll = async () => {
     try {
       setIsLoading(true);
@@ -33,106 +41,127 @@ export default function SocialPage() {
         axiosInstance.get(`/api/social/followers`),
         axiosInstance.get(`/api/social/requests/sent`),
         axiosInstance.get(`/api/social/requests/received`),
-      ])
-      setFollowings(fRes.data)
-      setFollowers(frRes.data)
-      setSentRequests(srRes.data)
-      setReceivedRequests(rrRes.data)
+      ]);
+      setFollowings(fRes.data);
+      setFollowers(frRes.data);
+      setSentRequests(srRes.data);
+      setReceivedRequests(rrRes.data);
     } catch (err) {
-      console.error("소셜 데이터 로딩 실패", err)
+      console.error("소셜 데이터 로딩 실패", err);
       toast.error("소셜 데이터 불러오기 실패, 다시 시도해주세요😥");
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
-  }
+  };
 
   // 언팔로우 처리
   const handleUnfollow = async (userId) => {
     try {
-      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
-      fetchAll()
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`,
+      );
+      fetchAll();
     } catch (err) {
-      console.error("언팔로우 실패", err)
+      console.error("언팔로우 실패", err);
       toast.error("언팔로우 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 요청 취소 처리
   const handleCancelRequest = async (userId) => {
     try {
-      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
-      fetchAll()
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`,
+      );
+      fetchAll();
     } catch (err) {
-      console.error("요청 취소 실패", err)
+      console.error("요청 취소 실패", err);
       toast.error("요청 취소 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 팔로워 삭제 처리
   const handleRemoveFollower = async (userId) => {
     try {
-      await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`);
+      await axiosInstance.delete(
+        `${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`,
+      );
       setFollowers(followers.filter((user) => user._id !== userId)); // ✅ user.id -> user._id
     } catch (err) {
       console.error("팔로워 삭제 실패", err);
       toast.error("팔로워 삭제 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 팔로워 요청 수락 처리
   const handleAcceptRequest = async (userId) => {
     try {
-      await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`, {})
-      fetchAll()
+      await axiosInstance.post(
+        `${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`,
+        {},
+      );
+      fetchAll();
     } catch (err) {
-      console.error("요청 수락 실패", err)
+      console.error("요청 수락 실패", err);
       toast.error("요청 수락 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 팔로워 요청 거절 처리
   const handleRejectRequest = async (userId) => {
     try {
-      await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`, {})
-      fetchAll()
+      await axiosInstance.post(
+        `${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`,
+        {},
+      );
+      fetchAll();
     } catch (err) {
-      console.error("요청 거절 실패", err)
+      console.error("요청 거절 실패", err);
       toast.error("요청 거절 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 검색 처리
   const handleSearch = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const res = await axiosInstance.get(`${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`)
-      setSearchResults(res.data)
-      setHasSearched(true)
+      const res = await axiosInstance.get(
+        `${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`,
+      );
+      setSearchResults(res.data);
+      setHasSearched(true);
     } catch (err) {
-      console.error("검색 실패", err)
+      console.error("검색 실패", err);
       toast.error("검색 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 팔로우 상태 변경 처리
   const handleToggleFollow = async (userId, status) => {
     try {
       if (status === "none") {
-        await axiosInstance.post(`${import.meta.env.VITE_API_BASE}/api/social/request`, { targetId: userId })
+        await axiosInstance.post(
+          `${import.meta.env.VITE_API_BASE}/api/social/request`,
+          { targetId: userId },
+        );
       } else if (status === "requested") {
-        await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`,
+        );
       } else if (status === "following") {
-        await axiosInstance.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
+        await axiosInstance.delete(
+          `${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`,
+        );
       }
       if (activeTab === "find") {
         handleSearch({ preventDefault: () => {} });
-      } 
+      }
       fetchAll();
     } catch (err) {
-      console.error("팔로우 상태 변경 실패", err)
+      console.error("팔로우 상태 변경 실패", err);
       toast.error("팔로우 상태 변경 실패, 다시 시도해주세요😢");
     }
-  }
+  };
 
   // 방문 처리
   const handleVisit = (user) => {
@@ -157,7 +186,7 @@ export default function SocialPage() {
           <UserCheck size={16} className="mr-1.5" />
           팔로잉
         </button>
-      )
+      );
     } else if (user.status === "requested") {
       return (
         <button
@@ -167,7 +196,7 @@ export default function SocialPage() {
           <Check size={16} className="mr-1.5" />
           전송됨
         </button>
-      )
+      );
     } else {
       return (
         <button
@@ -177,9 +206,9 @@ export default function SocialPage() {
           <UserPlus size={16} className="mr-1.5" />
           팔로우
         </button>
-      )
+      );
     }
-  }
+  };
 
   // 프로필 이미지 렌더링 (사용자 지정 이미지 또는 기본 아바타)
   const renderProfileImage = (user) => {
@@ -190,11 +219,11 @@ export default function SocialPage() {
           alt={`${user.username}의 프로필`}
           className="w-full h-full object-cover"
         />
-      )
+      );
     } else {
-      return <DefaultAvatar username={user.username} />
+      return <DefaultAvatar username={user.username} />;
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -209,7 +238,9 @@ export default function SocialPage() {
       {/* 헤더 */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-800">소셜</h1>
-        <p className="text-gray-600 mt-1">친구들과 운동 루틴을 공유하고 소통하세요</p>
+        <p className="text-gray-600 mt-1">
+          친구들과 운동 루틴을 공유하고 소통하세요
+        </p>
       </div>
 
       {/* 탭 네비게이션 */}
@@ -237,7 +268,9 @@ export default function SocialPage() {
           </button>
           <button
             className={`flex-1 py-3 text-center font-medium transition-colors ${
-              activeTab === "find" ? "text-[#6ca7af] border-b-2 border-[#6ca7af]" : "text-gray-500 hover:text-gray-700"
+              activeTab === "find"
+                ? "text-[#6ca7af] border-b-2 border-[#6ca7af]"
+                : "text-gray-500 hover:text-gray-700"
             }`}
             onClick={() => setActiveTab("find")}
           >
@@ -250,12 +283,17 @@ export default function SocialPage() {
           <div className="p-6 space-y-8">
             {/* 팔로잉 목록 섹션 */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">팔로잉</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                팔로잉
+              </h2>
 
               {followings.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {followings.map((user) => (
-                    <div key={user.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div
+                      key={user.id}
+                      className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                    >
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
@@ -264,7 +302,9 @@ export default function SocialPage() {
                           {renderProfileImage(user)}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-800">{user.username}</h3>
+                          <h3 className="font-medium text-gray-800">
+                            {user.username}
+                          </h3>
                         </div>
                       </div>
 
@@ -297,10 +337,15 @@ export default function SocialPage() {
             {/* 보낸 요청 섹션 */}
             {sentRequests.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">보낸 요청</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  보낸 요청
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sentRequests.map((user) => (
-                    <div key={user.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div
+                      key={user.id}
+                      className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                    >
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
@@ -309,7 +354,9 @@ export default function SocialPage() {
                           {renderProfileImage(user)}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-800">{user.username}</h3>
+                          <h3 className="font-medium text-gray-800">
+                            {user.username}
+                          </h3>
                         </div>
                       </div>
 
@@ -342,55 +389,63 @@ export default function SocialPage() {
           <div className="p-6 space-y-8">
             {/* 팔로워 목록 섹션 */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">팔로워</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                팔로워
+              </h2>
 
               {followers.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {followers.map((user) => {
-  // status 계산
-  let status = "none";
-  if (followings.some(f => f._id === user._id)) {
-    status = "following";
-  } else if (sentRequests.some(r => r._id === user._id)) {
-    status = "requested";
-  }
+                    // status 계산
+                    let status = "none";
+                    if (followings.some((f) => f._id === user._id)) {
+                      status = "following";
+                    } else if (sentRequests.some((r) => r._id === user._id)) {
+                      status = "requested";
+                    }
 
-  return (
-    <div key={user._id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
-      <div className="flex items-center space-x-3">
-        <div
-          className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
-          onClick={() => handleVisit(user)}
-        >
-          {renderProfileImage(user)}
-        </div>
-        <div className="flex-1">
-          <h3 className="font-medium text-gray-800">{user.username}</h3>
-        </div>
-      </div>
+                    return (
+                      <div
+                        key={user._id}
+                        className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div
+                            className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
+                            onClick={() => handleVisit(user)}
+                          >
+                            {renderProfileImage(user)}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-medium text-gray-800">
+                              {user.username}
+                            </h3>
+                          </div>
+                        </div>
 
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => handleVisit(user)}
-          className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-        >
-          <ExternalLink size={16} className="mr-1.5" />
-          방문
-        </button>
-        <div className="flex space-x-2">
-          {renderFollowButton({...user, status})} {/* ✅ status 주입 */}
-          <button
-            onClick={() => handleRemoveFollower(user._id)}
-            className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-          >
-            <X size={16} className="mr-1.5" />
-            삭제
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-})}
+                        <div className="flex justify-between mt-4">
+                          <button
+                            onClick={() => handleVisit(user)}
+                            className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                          >
+                            <ExternalLink size={16} className="mr-1.5" />
+                            방문
+                          </button>
+                          <div className="flex space-x-2">
+                            {renderFollowButton({ ...user, status })}{" "}
+                            {/* ✅ status 주입 */}
+                            <button
+                              onClick={() => handleRemoveFollower(user._id)}
+                              className="flex items-center px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                            >
+                              <X size={16} className="mr-1.5" />
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
@@ -402,10 +457,15 @@ export default function SocialPage() {
             {/* 받은 요청 섹션 */}
             {receivedRequests.length > 0 && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">받은 요청</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  받은 요청
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {receivedRequests.map((user) => (
-                    <div key={user.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div
+                      key={user.id}
+                      className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                    >
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
@@ -414,7 +474,9 @@ export default function SocialPage() {
                           {renderProfileImage(user)}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-gray-800">{user.username}</h3>
+                          <h3 className="font-medium text-gray-800">
+                            {user.username}
+                          </h3>
                         </div>
                       </div>
 
@@ -428,7 +490,10 @@ export default function SocialPage() {
                         </button>
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => {console.log('Accept button clicked, user:', user);handleAcceptRequest(user._id)}}
+                            onClick={() => {
+                              console.log("Accept button clicked, user:", user);
+                              handleAcceptRequest(user._id);
+                            }}
                             className="flex items-center px-2 py-1.5 rounded-md text-sm font-medium bg-[#6ca7af] text-white hover:bg-[#5a8f96] transition-colors"
                           >
                             <Check size={14} className="mr-1" />
@@ -474,12 +539,17 @@ export default function SocialPage() {
             {/* 검색 결과 */}
             {hasSearched && (
               <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">검색 결과</h2>
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                  검색 결과
+                </h2>
 
                 {searchResults.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {searchResults.map((user) => (
-                      <div key={user._id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                      <div
+                        key={user._id}
+                        className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                      >
                         <div className="flex items-center space-x-3">
                           <div
                             className="w-12 h-12 rounded-full overflow-hidden cursor-pointer"
@@ -488,7 +558,9 @@ export default function SocialPage() {
                             {renderProfileImage(user)}
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-800">{user.username}</h3>
+                            <h3 className="font-medium text-gray-800">
+                              {user.username}
+                            </h3>
                           </div>
                         </div>
 
@@ -516,5 +588,5 @@ export default function SocialPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

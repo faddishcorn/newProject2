@@ -19,7 +19,7 @@ export default function PrivateRoute({ children }) {
     // };
 
     // checkAuth();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     } else {

@@ -1,56 +1,58 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate, useParams, useLocation } from "react-router-dom"
-import { CheckCircle, ArrowLeft, Trophy } from "lucide-react"
-import axios from "axios"
-import { toast } from "react-toastify"
-import axiosInstance from '../api/axiosInstance';
+import { useState } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { CheckCircle, ArrowLeft, Trophy } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import axiosInstance from "../api/axiosInstance";
 
 export default function RoutineExecutionPage() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { routineId } = useParams()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { routineId } = useParams();
 
   const [routine, setRoutine] = useState(
     location.state?.routine || {
       id: Number.parseInt(routineId) || 1,
       title: "",
       exercises: [],
-    }
-  )
+    },
+  );
 
-  const completedExercises = routine.exercises.filter((ex) => ex.isCompleted).length
-  const totalExercises = routine.exercises.length
-  const allCompleted = completedExercises === totalExercises
+  const completedExercises = routine.exercises.filter(
+    (ex) => ex.isCompleted,
+  ).length;
+  const totalExercises = routine.exercises.length;
+  const allCompleted = completedExercises === totalExercises;
 
   const getEncouragementMessage = () => {
-    const percentage = (completedExercises / totalExercises) * 100
+    const percentage = (completedExercises / totalExercises) * 100;
 
-    if (percentage === 0) return "운동을 시작해볼까요? 화이팅!"
-    if (percentage < 50) return "좋아요! 계속 진행해보세요!"
-    if (percentage < 100) return "절반 이상 완료했어요! 조금만 더 힘내세요!"
-    return "대단해요! 모든 운동을 완료했습니다!"
-  }
+    if (percentage === 0) return "운동을 시작해볼까요? 화이팅!";
+    if (percentage < 50) return "좋아요! 계속 진행해보세요!";
+    if (percentage < 100) return "절반 이상 완료했어요! 조금만 더 힘내세요!";
+    return "대단해요! 모든 운동을 완료했습니다!";
+  };
 
   const toggleExerciseCompletion = (exerciseId) => {
     setRoutine((prev) => ({
       ...prev,
       exercises: prev.exercises.map((exercise) =>
-        (exercise.id === exerciseId || exercise._id === exerciseId)
+        exercise.id === exerciseId || exercise._id === exerciseId
           ? { ...exercise, isCompleted: !exercise.isCompleted }
-          : exercise
+          : exercise,
       ),
-    }))
-  }
+    }));
+  };
 
   const handleCompleteRoutine = async () => {
     try {
-      await axiosInstance.post('/api/routines/history', {
+      await axiosInstance.post("/api/routines/history", {
         title: routine.title,
         exercises: routine.exercises,
       });
-  
+
       navigate("/main", {
         state: {
           routineCompleted: true,
@@ -62,17 +64,19 @@ export default function RoutineExecutionPage() {
       toast.error("루틴 저장 중 문제가 발생했습니다.");
     }
   };
-  
 
   const handleCancel = () => {
-    navigate("/main")
-  }
+    navigate("/main");
+  };
 
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center mb-4">
-          <button onClick={handleCancel} className="p-2 rounded-full hover:bg-gray-100 mr-2">
+          <button
+            onClick={handleCancel}
+            className="p-2 rounded-full hover:bg-gray-100 mr-2"
+          >
             <ArrowLeft size={20} />
           </button>
           <div>
@@ -83,7 +87,9 @@ export default function RoutineExecutionPage() {
 
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex items-center justify-between">
-            <p className="text-gray-700 font-medium">{getEncouragementMessage()}</p>
+            <p className="text-gray-700 font-medium">
+              {getEncouragementMessage()}
+            </p>
             <p className="text-sm text-gray-500">
               {completedExercises}/{totalExercises} 완료
             </p>
@@ -106,20 +112,28 @@ export default function RoutineExecutionPage() {
           <div
             key={exercise.id || exercise._id}
             className={`p-4 rounded-lg border transition-colors ${
-              exercise.isCompleted ? "border-green-200 bg-green-50" : "border-gray-200 bg-white"
+              exercise.isCompleted
+                ? "border-green-200 bg-green-50"
+                : "border-gray-200 bg-white"
             }`}
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className={`font-medium ${exercise.isCompleted ? "text-green-700" : "text-gray-800"}`}>
+                <h3
+                  className={`font-medium ${exercise.isCompleted ? "text-green-700" : "text-gray-800"}`}
+                >
                   {exercise.name}
                 </h3>
-                <p className={`text-sm ${exercise.isCompleted ? "text-green-600" : "text-gray-500"}`}>
+                <p
+                  className={`text-sm ${exercise.isCompleted ? "text-green-600" : "text-gray-500"}`}
+                >
                   {exercise.sets} 세트 x {exercise.reps} 회
                 </p>
               </div>
               <button
-                onClick={() => toggleExerciseCompletion(exercise.id || exercise._id)}
+                onClick={() =>
+                  toggleExerciseCompletion(exercise.id || exercise._id)
+                }
                 className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   exercise.isCompleted
                     ? "bg-green-100 text-green-700 hover:bg-green-200"
@@ -143,10 +157,13 @@ export default function RoutineExecutionPage() {
         <button
           onClick={handleCompleteRoutine}
           className={`flex items-center justify-center px-4 py-3 rounded-md text-white font-medium transition-colors ${
-            allCompleted ? "bg-green-600 hover:bg-green-700" : "bg-[#6ca7af] hover:bg-[#5a8f96]"
+            allCompleted
+              ? "bg-green-600 hover:bg-green-700"
+              : "bg-[#6ca7af] hover:bg-[#5a8f96]"
           }`}
         >
-          {allCompleted && <Trophy size={18} className="mr-2" />} 오늘의 루틴 완료!
+          {allCompleted && <Trophy size={18} className="mr-2" />} 오늘의 루틴
+          완료!
         </button>
         <button
           onClick={handleCancel}
@@ -156,5 +173,5 @@ export default function RoutineExecutionPage() {
         </button>
       </div>
     </div>
-  )
+  );
 }

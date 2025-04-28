@@ -1,9 +1,9 @@
-import Button from "../components/Button"
-import logo from "../assets/logo.png"
+import Button from "../components/Button";
+import logo from "../assets/logo.png";
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from "../api/axiosInstance";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -33,13 +33,15 @@ export default function LoginPage() {
 
       const res = await axiosInstance.post(`/api/auth/login`, form);
       const { token } = res.data;
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
 
       // 3. 이동
       navigate("/main");
     } catch (err) {
       console.error("로그인 실패:", err);
-      const errorMessage = err.response?.data?.message || "로그인 실패. 잠시 후 다시 시도해주세요.";
+      const errorMessage =
+        err.response?.data?.message ||
+        "로그인 실패. 잠시 후 다시 시도해주세요.";
       setMessage(errorMessage);
     } finally {
       setIsLoading(false); // 요청 끝나면 로딩 해제
@@ -59,14 +61,18 @@ export default function LoginPage() {
       <div className="mx-auto w-full max-w-md space-y-6 px-4">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">로그인</h1>
-          <p className="text-muted-foreground">계정에 로그인하여 맞춤형 운동 루틴을 관리하세요</p>
+          <p className="text-muted-foreground">
+            계정에 로그인하여 맞춤형 운동 루틴을 관리하세요
+          </p>
         </div>
 
         <div className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* 이메일 입력 */}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">이메일</label>
+              <label htmlFor="email" className="text-sm font-medium">
+                이메일
+              </label>
               <input
                 id="email"
                 name="email"
@@ -83,8 +89,15 @@ export default function LoginPage() {
             {/* 비밀번호 입력 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium">비밀번호</label>
-                <a href="/forgot-password" className="text-xs underline hover:underline-offset-4">비밀번호 찾기</a>
+                <label htmlFor="password" className="text-sm font-medium">
+                  비밀번호
+                </label>
+                <a
+                  href="/forgot-password"
+                  className="text-xs underline hover:underline-offset-4"
+                >
+                  비밀번호 찾기
+                </a>
               </div>
               <input
                 id="password"
@@ -99,7 +112,10 @@ export default function LoginPage() {
             </div>
 
             {/* 로그인 버튼 */}
-            <Button className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+            <Button
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
@@ -111,13 +127,18 @@ export default function LoginPage() {
             </Button>
 
             {/* 에러 메시지 */}
-            {message && <p className="text-red-500 text-sm text-center">{message}</p>}
+            {message && (
+              <p className="text-red-500 text-sm text-center">{message}</p>
+            )}
           </form>
 
           {/* 회원가입 링크 */}
           <div className="mt-4 text-center text-sm">
             계정이 없으신가요?{" "}
-            <a href="/signup" className="text-primary underline-offset-4 hover:underline">
+            <a
+              href="/signup"
+              className="text-primary underline-offset-4 hover:underline"
+            >
               회원가입
             </a>
           </div>
@@ -126,7 +147,10 @@ export default function LoginPage() {
 
       {/* 홈으로 돌아가기 */}
       <div className="mt-8 text-center text-sm text-muted-foreground">
-        <a href="/" className="hover:text-foreground underline underline-offset-4">
+        <a
+          href="/"
+          className="hover:text-foreground underline underline-offset-4"
+        >
           홈으로 돌아가기
         </a>
       </div>

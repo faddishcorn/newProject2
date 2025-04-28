@@ -1,10 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { Camera, Save, Eye, EyeOff, Lock, Mail, User, Calendar, Ruler, Weight, Users, Trash2, AlertTriangle } from "lucide-react"
-import DefaultAvatar from "../components/DefaultAvatar"
-import axiosInstance from '../api/axiosInstance';
-import { toast } from "react-toastify"
+import { useState, useEffect, useRef } from "react";
+import {
+  Camera,
+  Save,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+  Calendar,
+  Ruler,
+  Weight,
+  Users,
+  Trash2,
+  AlertTriangle,
+} from "lucide-react";
+import DefaultAvatar from "../components/DefaultAvatar";
+import axiosInstance from "../api/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function ProfilePage() {
   const [user, setUser] = useState({
@@ -42,10 +56,21 @@ export default function ProfilePage() {
           ...userData,
           newPassword: "",
           confirmPassword: "",
-          birthdate: userData.birthdate === null ? "private" : (userData.birthdate ? userData.birthdate.split("T")[0] : ""),
-          height: userData.height === null ? "private" : (userData.height?.toString() || ""),
-          weight: userData.weight === null ? "private" : (userData.weight?.toString() || ""),
-          gender: userData.gender
+          birthdate:
+            userData.birthdate === null
+              ? "private"
+              : userData.birthdate
+                ? userData.birthdate.split("T")[0]
+                : "",
+          height:
+            userData.height === null
+              ? "private"
+              : userData.height?.toString() || "",
+          weight:
+            userData.weight === null
+              ? "private"
+              : userData.weight?.toString() || "",
+          gender: userData.gender,
         });
         if (userData.avatar) setImagePreview(userData.avatar);
         setIsLoading(false);
@@ -75,7 +100,7 @@ export default function ProfilePage() {
   const togglePrivate = (field) => {
     setUser((prev) => ({
       ...prev,
-      [field]: prev[field] === "private" ? "" : "private"
+      [field]: prev[field] === "private" ? "" : "private",
     }));
   };
 
@@ -110,7 +135,7 @@ export default function ProfilePage() {
     try {
       await axiosInstance.delete(`/api/users/account`);
       localStorage.removeItem("token");
-      window.location.href = '/login';
+      window.location.href = "/login";
     } catch (error) {
       console.error("계정 삭제 중 오류:", error);
       toast.error("계정 삭제 중 오류 발생");
@@ -121,10 +146,14 @@ export default function ProfilePage() {
     e.preventDefault();
     const validationErrors = {};
 
-    if (!user.username.trim()) validationErrors.username = "사용자 이름은 필수입니다.";
-    if (!user.email.trim() || !/\S+@\S+\.\S+/.test(user.email)) validationErrors.email = "유효한 이메일을 입력해주세요.";
-    if (user.newPassword && user.newPassword.length < 8) validationErrors.newPassword = "비밀번호는 최소 8자 이상이어야 합니다.";
-    if (user.newPassword !== user.confirmPassword) validationErrors.confirmPassword = "비밀번호가 일치하지 않습니다.";
+    if (!user.username.trim())
+      validationErrors.username = "사용자 이름은 필수입니다.";
+    if (!user.email.trim() || !/\S+@\S+\.\S+/.test(user.email))
+      validationErrors.email = "유효한 이메일을 입력해주세요.";
+    if (user.newPassword && user.newPassword.length < 8)
+      validationErrors.newPassword = "비밀번호는 최소 8자 이상이어야 합니다.";
+    if (user.newPassword !== user.confirmPassword)
+      validationErrors.confirmPassword = "비밀번호가 일치하지 않습니다.";
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -134,25 +163,36 @@ export default function ProfilePage() {
     try {
       setIsSaving(true);
       const formData = new FormData();
-      formData.append('username', user.username);
-      formData.append('email', user.email);
-      formData.append('gender', user.gender);
-      formData.append('birthdate', (user.birthdate === "private" || user.birthdate === "") ? "null" : user.birthdate);
-      formData.append('height', (user.height === "private" || user.height === "") ? "null" : user.height);
-      formData.append('weight', (user.weight === "private" || user.weight === "") ? "null" : user.weight);
-      formData.append('isPrivate', user.isPrivate);
+      formData.append("username", user.username);
+      formData.append("email", user.email);
+      formData.append("gender", user.gender);
+      formData.append(
+        "birthdate",
+        user.birthdate === "private" || user.birthdate === ""
+          ? "null"
+          : user.birthdate,
+      );
+      formData.append(
+        "height",
+        user.height === "private" || user.height === "" ? "null" : user.height,
+      );
+      formData.append(
+        "weight",
+        user.weight === "private" || user.weight === "" ? "null" : user.weight,
+      );
+      formData.append("isPrivate", user.isPrivate);
       if (user.newPassword) {
-        formData.append('password', user.password);
-        formData.append('newPassword', user.newPassword);
+        formData.append("password", user.password);
+        formData.append("newPassword", user.newPassword);
       }
       if (user.avatar instanceof File) {
-        formData.append('avatar', user.avatar);
+        formData.append("avatar", user.avatar);
       } else if (user.avatar === null) {
-        formData.append('avatarDelete', true);
+        formData.append("avatarDelete", true);
       }
 
       await axiosInstance.put(`/api/users/profile`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success("프로필이 업데이트되었습니다.");
@@ -164,26 +204,39 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-64"><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-[#6ca7af] rounded-full"></div></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-[#6ca7af] rounded-full"></div>
+      </div>
+    );
 
   return (
     <div className="space-y-6">
       {/* 헤더 */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-800">내 정보</h1>
-        <p className="text-gray-600 mt-1">개인 정보를 관리하고 업데이트하세요</p>
+        <p className="text-gray-600 mt-1">
+          개인 정보를 관리하고 업데이트하세요
+        </p>
       </div>
 
       {/* 성공 메시지 */}
       {successMessage && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <span className="block sm:inline">{successMessage}</span>
         </div>
       )}
 
       {/* 서버 오류 메시지 */}
       {errors.submit && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <span className="block sm:inline">{errors.submit}</span>
         </div>
       )}
@@ -191,7 +244,9 @@ export default function ProfilePage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 프로필 이미지 섹션 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">프로필 이미지</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            프로필 이미지
+          </h2>
 
           <div className="flex flex-col items-center">
             <div
@@ -206,7 +261,11 @@ export default function ProfilePage() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <DefaultAvatar username={user.username} size="xl" className="w-full h-full" />
+                  <DefaultAvatar
+                    username={user.username}
+                    size="xl"
+                    className="w-full h-full"
+                  />
                 </div>
               )}
 
@@ -215,7 +274,13 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
 
             <div className="flex space-x-3">
               <button
@@ -242,12 +307,17 @@ export default function ProfilePage() {
 
         {/* 기본 정보 섹션 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">기본 정보</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            기본 정보
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 사용자 이름 */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 <User className="inline-block w-4 h-4 mr-1" />
                 닉네임
               </label>
@@ -261,12 +331,17 @@ export default function ProfilePage() {
                   errors.username ? "border-red-500" : "border-gray-300"
                 } focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
               />
-              {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username}</p>}
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+              )}
             </div>
 
             {/* 이메일 */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 <Mail className="inline-block w-4 h-4 mr-1" />
                 이메일
               </label>
@@ -280,91 +355,124 @@ export default function ProfilePage() {
                   errors.email ? "border-red-500" : "border-gray-300"
                 } focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             {/* 성별 */}
             <div>
-          <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-            <Users className="inline-block w-4 h-4 mr-1" />성별
-          </label>
-          <select
-            id="gender"
-            name="gender"
-            value={user.gender}
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-          >
-            <option value="">선택하세요</option>
-            <option value="male">남성</option>
-            <option value="female">여성</option>
-            <option value="private">비공개</option>
-          </select>
-        </div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                <Users className="inline-block w-4 h-4 mr-1" />
+                성별
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={user.gender}
+                onChange={handleChange}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+              >
+                <option value="">선택하세요</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="private">비공개</option>
+              </select>
+            </div>
 
             {/* 생년월일 */}
             <div>
-          <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
-            <Calendar className="inline-block w-4 h-4 mr-1" />생년월일
-          </label>
-          <input
-            id="birthdate"
-            name="birthdate"
-            type="date"
-            value={user.birthdate === "private" ? "" : user.birthdate}
-            onChange={handleChange}
-            disabled={user.birthdate === "private"}
-            required={user.birthdate !== "private"}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-          />
-          <button type="button" onClick={() => togglePrivate("birthdate")} className="text-xs text-gray-500 underline">
-            {user.birthdate === "private" ? "입력하기" : "비공개"}
-          </button>
-        </div>
+              <label
+                htmlFor="birthdate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                <Calendar className="inline-block w-4 h-4 mr-1" />
+                생년월일
+              </label>
+              <input
+                id="birthdate"
+                name="birthdate"
+                type="date"
+                value={user.birthdate === "private" ? "" : user.birthdate}
+                onChange={handleChange}
+                disabled={user.birthdate === "private"}
+                required={user.birthdate !== "private"}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => togglePrivate("birthdate")}
+                className="text-xs text-gray-500 underline"
+              >
+                {user.birthdate === "private" ? "입력하기" : "비공개"}
+              </button>
+            </div>
 
             {/* 키 */}
             <div>
-          <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
-            <Ruler className="inline-block w-4 h-4 mr-1" />키 (cm)
-          </label>
-          <input
-            id="height"
-            name="height"
-            type="number"
-            value={user.height === "private" ? "" : user.height}
-            onChange={handleChange}
-            disabled={user.height === "private"}
-            required={user.height !== "private"} 
-            className={`w-full px-4 py-2 rounded-md border ${errors.height ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
-            placeholder="예: 175"
-          />
-          <button type="button" onClick={() => togglePrivate("height")} className="text-xs text-gray-500 underline">
-            {user.height === "private" ? "입력하기" : "비공개"}
-          </button>
-          {errors.height && <p className="mt-1 text-sm text-red-600">{errors.height}</p>}
-        </div>
+              <label
+                htmlFor="height"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                <Ruler className="inline-block w-4 h-4 mr-1" />키 (cm)
+              </label>
+              <input
+                id="height"
+                name="height"
+                type="number"
+                value={user.height === "private" ? "" : user.height}
+                onChange={handleChange}
+                disabled={user.height === "private"}
+                required={user.height !== "private"}
+                className={`w-full px-4 py-2 rounded-md border ${errors.height ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
+                placeholder="예: 175"
+              />
+              <button
+                type="button"
+                onClick={() => togglePrivate("height")}
+                className="text-xs text-gray-500 underline"
+              >
+                {user.height === "private" ? "입력하기" : "비공개"}
+              </button>
+              {errors.height && (
+                <p className="mt-1 text-sm text-red-600">{errors.height}</p>
+              )}
+            </div>
 
             {/* 몸무게 */}
             <div>
-          <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
-            <Weight className="inline-block w-4 h-4 mr-1" />몸무게 (kg)
-          </label>
-          <input
-            id="weight"
-            name="weight"
-            type="number"
-            value={user.weight === "private" ? "" : user.weight}
-            onChange={handleChange}
-            disabled={user.weight === "private"}
-            required={user.weight !== "private"}
-            className={`w-full px-4 py-2 rounded-md border ${errors.weight ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
-            placeholder="예: 65"
-          />
-          <button type="button" onClick={() => togglePrivate("weight")} className="text-xs text-gray-500 underline">
-            {user.weight === "private" ? "입력하기" : "비공개"}
-          </button>
-          {errors.weight && <p className="mt-1 text-sm text-red-600">{errors.weight}</p>}
-        </div>
+              <label
+                htmlFor="weight"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                <Weight className="inline-block w-4 h-4 mr-1" />
+                몸무게 (kg)
+              </label>
+              <input
+                id="weight"
+                name="weight"
+                type="number"
+                value={user.weight === "private" ? "" : user.weight}
+                onChange={handleChange}
+                disabled={user.weight === "private"}
+                required={user.weight !== "private"}
+                className={`w-full px-4 py-2 rounded-md border ${errors.weight ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
+                placeholder="예: 65"
+              />
+              <button
+                type="button"
+                onClick={() => togglePrivate("weight")}
+                className="text-xs text-gray-500 underline"
+              >
+                {user.weight === "private" ? "입력하기" : "비공개"}
+              </button>
+              {errors.weight && (
+                <p className="mt-1 text-sm text-red-600">{errors.weight}</p>
+              )}
+            </div>
 
             {/* 프로필 공개 여부 - 토글 스위치 */}
             <div className="md:col-span-2">
@@ -376,7 +484,9 @@ export default function ProfilePage() {
                   type="button"
                   role="switch"
                   aria-checked={user.isPrivate}
-                  onClick={() => setUser({ ...user, isPrivate: !user.isPrivate })}
+                  onClick={() =>
+                    setUser({ ...user, isPrivate: !user.isPrivate })
+                  }
                   className={`${
                     user.isPrivate ? "bg-[#6ca7af]" : "bg-gray-200"
                   } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:ring-offset-2`}
@@ -395,12 +505,17 @@ export default function ProfilePage() {
 
         {/* 비밀번호 변경 섹션 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">비밀번호 변경</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            비밀번호 변경
+          </h2>
 
           <div className="space-y-4">
             {/* 현재 비밀번호 */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 <Lock className="inline-block w-4 h-4 mr-1" />
                 현재 비밀번호
               </label>
@@ -419,14 +534,21 @@ export default function ProfilePage() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             {/* 새 비밀번호 */}
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 <Lock className="inline-block w-4 h-4 mr-1" />새 비밀번호
               </label>
               <div className="relative">
@@ -446,16 +568,29 @@ export default function ProfilePage() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                 >
-                  {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showNewPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
-              {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>}
-              <p className="mt-1 text-xs text-gray-500">비밀번호는 최소 8자 이상이어야 합니다.</p>
+              {errors.newPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.newPassword}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-500">
+                비밀번호는 최소 8자 이상이어야 합니다.
+              </p>
             </div>
 
             {/* 비밀번호 확인 */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 <Lock className="inline-block w-4 h-4 mr-1" />
                 비밀번호 확인
               </label>
@@ -470,7 +605,11 @@ export default function ProfilePage() {
                 } focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
                 placeholder="새 비밀번호를 다시 입력하세요"
               />
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -516,7 +655,8 @@ export default function ProfilePage() {
             </div>
 
             <p className="text-gray-700 mb-6">
-              정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 영구적으로 삭제됩니다.
+              정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든
+              데이터가 영구적으로 삭제됩니다.
             </p>
 
             <div className="flex justify-end space-x-3">
@@ -539,5 +679,5 @@ export default function ProfilePage() {
         </div>
       )}
     </div>
-  )
+  );
 }

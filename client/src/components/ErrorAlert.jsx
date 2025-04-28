@@ -13,4 +13,4 @@ const ErrorAlert = ({ message, onClose }) => {
   );
 };
 
-export default ErrorAlert
+export default ErrorAlert;
