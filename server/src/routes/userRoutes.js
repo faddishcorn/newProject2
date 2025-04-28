@@ -51,11 +51,11 @@ router.put('/profile', authMiddleware, upload.single('avatar'), async (req, res)
       user.password = hashedNewPassword;
     }
 
-    // 파일이 있을 때만 avatar 업데이트
-    if (req.file) {
-      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-      user.avatar = `${protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    // avatar 업데이트
+    if (req.file && req.file.path) {
+      user.avatar = req.file.path; // Cloudinary가 반환하는 URL
     }
+
     if (req.body.avatarDelete === 'true') {
       user.avatar = null;
     }

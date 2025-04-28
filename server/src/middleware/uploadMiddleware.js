@@ -1,18 +1,26 @@
 const multer = require('multer');
-const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+require('dotenv').config();
 
-// 저장할 위치와 파일명 지정
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // 프로젝트 루트/uploads 폴더에 저장
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const basename = path.basename(file.originalname, ext);
-    cb(null, basename + '-' + Date.now() + ext); // 파일명-타임스탬프.확장자
+// Cloudinary 설정
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Cloudinary Storage 설정
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'avatars', // Cloudinary 안에 저장될 폴더 이름
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 300, height: 300, crop: 'limit' }], // (선택) 크기 제한
   },
 });
 
+// multer 설정
 const upload = multer({ storage });
 
 module.exports = upload;
