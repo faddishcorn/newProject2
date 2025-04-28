@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const signup = async (req, res) => {
-  const { username, email, password, height, weight, gender, birthdate } = req.body;
+  let { username, email, password, height, weight, gender, birthdate } = req.body;
 
   try {
     // 사용자 중복 확인
@@ -14,6 +14,16 @@ const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+     // ✅ height와 weight가 "private"이면 null로 변환
+     height = height === "private" ? null : height;
+     weight = weight === "private" ? null : weight;
+ 
+     // ✅ gender도 "private"이면 null로 변환
+     gender = gender === "private" ? null : gender;
+ 
+     // ✅ birthdate도 "private"이면 null로 변환
+     birthdate = birthdate === "private" ? null : birthdate;
+     
     // 사용자 생성
     const newUser = new User({
       username,

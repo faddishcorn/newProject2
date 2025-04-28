@@ -3,12 +3,10 @@
 import { useState, useEffect, useRef } from "react"
 import { Camera, Save, Eye, EyeOff, Lock, Mail, User, Calendar, Ruler, Weight, Users, Trash2, AlertTriangle } from "lucide-react"
 import DefaultAvatar from "../components/DefaultAvatar"
-import axios from "axios"
-import { toast } from "react-toastify"
 import axiosInstance from '../api/axiosInstance';
+import { toast } from "react-toastify"
 
 export default function ProfilePage() {
-  // 사용자 정보 상태
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -21,215 +19,152 @@ export default function ProfilePage() {
     birthdate: "",
     avatar: null,
     isPrivate: true,
-  })
+  });
 
-  // 상태 관리
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [successMessage, setSuccessMessage] = useState("")
-  const [imagePreview, setImagePreview] = useState(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  
-  const fileInputRef = useRef(null)
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // 사용자 정보 가져오기
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-    
         const res = await axiosInstance.get(`/api/users/profile`);
-    
         const userData = res.data;
-    
         setUser({
           ...userData,
           newPassword: "",
           confirmPassword: "",
-          birthdate: userData.birthdate ? userData.birthdate.split("T")[0] : "",
-          height: userData.height || "",
-          weight: userData.weight || "",
+          birthdate: userData.birthdate === null ? "private" : (userData.birthdate ? userData.birthdate.split("T")[0] : ""),
+          height: userData.height === null ? "private" : (userData.height?.toString() || ""),
+          weight: userData.weight === null ? "private" : (userData.weight?.toString() || ""),
+          gender: userData.gender
         });
-    
-        if (userData.avatar) {
-          setImagePreview(userData.avatar);
-        }
-    
+        if (userData.avatar) setImagePreview(userData.avatar);
         setIsLoading(false);
       } catch (error) {
         console.error("사용자 정보를 가져오는 중 오류 발생:", error);
         toast.error("사용자 정보를 가져오는 중 오류 발생");
         setIsLoading(false);
       }
-    }
+    };
+    fetchUserData();
+  }, []);
 
-    fetchUserData()
-  }, [])
-
-  // 입력 변경 처리
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setUser({
-      ...user,
+    const { name, value, type, checked } = e.target;
+    setUser((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    })
-
-    // 에러 메시지 초기화
+    }));
     if (errors[name]) {
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         [name]: null,
-      })
+      }));
     }
-  }
-
-  // 이미지 업로드 처리
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
-        setUser({
-          ...user,
-          avatar: file,
-        })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  // 이미지 업로드 버튼 클릭
-  const handleImageClick = () => {
-    fileInputRef.current.click()
-  }
-
-  // 이미지 삭제 처리
-  const handleDeleteImage = () => {
-    setImagePreview(null);
-    setUser({
-      ...user,
-      avatar: null, // ✅ avatar를 null로 세팅
-    });
   };
 
-  // 회원 탈퇴 처리
+  const togglePrivate = (field) => {
+    setUser((prev) => ({
+      ...prev,
+      [field]: prev[field] === "private" ? "" : "private"
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setUser((prev) => ({
+          ...prev,
+          avatar: file,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleDeleteImage = () => {
+    setImagePreview(null);
+    setUser((prev) => ({
+      ...prev,
+      avatar: null,
+    }));
+  };
+
   const handleDeleteAccount = async () => {
     try {
       await axiosInstance.delete(`/api/users/account`);
-  
-      console.log("계정이 삭제되었습니다.");
-  
-      // 토큰 삭제 + 리다이렉트
-      localStorage.removeItem("");
-      window.location.href = '/login'; // 로그인 페이지로 이동
-  
-      setShowDeleteConfirm(false);
+      localStorage.removeItem("token");
+      window.location.href = '/login';
     } catch (error) {
-      console.error("계정 삭제 중 오류가 발생했습니다:", error);
-      setErrors({
-        submit: "계정 삭제 중 오류가 발생했습니다. 다시 시도해주세요.",
-      });
-      setShowDeleteConfirm(false);
+      console.error("계정 삭제 중 오류:", error);
+      toast.error("계정 삭제 중 오류 발생");
     }
   };
 
-  // 폼 제출 처리
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+    const validationErrors = {};
 
-    // 유효성 검사
-    const validationErrors = {}
-
-    if (!user.username.trim()) {
-      validationErrors.username = "사용자 이름은 필수입니다."
-    }
-
-    if (!user.email.trim()) {
-      validationErrors.email = "이메일은 필수입니다."
-    } else if (!/\S+@\S+\.\S+/.test(user.email)) {
-      validationErrors.email = "유효한 이메일 주소를 입력해주세요."
-    }
-
-    if (user.newPassword) {
-      if (user.newPassword.length < 8) {
-        validationErrors.newPassword = "비밀번호는 최소 8자 이상이어야 합니다."
-      }
-
-      if (user.newPassword !== user.confirmPassword) {
-        validationErrors.confirmPassword = "비밀번호가 일치하지 않습니다."
-      }
-    }
-
-    if (user.height && (isNaN(user.height) || user.height <= 0)) {
-      validationErrors.height = "유효한 키를 입력해주세요."
-    }
-
-    if (user.weight && (isNaN(user.weight) || user.weight <= 0)) {
-      validationErrors.weight = "유효한 몸무게를 입력해주세요."
-    }
+    if (!user.username.trim()) validationErrors.username = "사용자 이름은 필수입니다.";
+    if (!user.email.trim() || !/\S+@\S+\.\S+/.test(user.email)) validationErrors.email = "유효한 이메일을 입력해주세요.";
+    if (user.newPassword && user.newPassword.length < 8) validationErrors.newPassword = "비밀번호는 최소 8자 이상이어야 합니다.";
+    if (user.newPassword !== user.confirmPassword) validationErrors.confirmPassword = "비밀번호가 일치하지 않습니다.";
 
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
-      return
+      setErrors(validationErrors);
+      return;
     }
 
     try {
       setIsSaving(true);
-  
       const formData = new FormData();
       formData.append('username', user.username);
       formData.append('email', user.email);
       formData.append('gender', user.gender);
-      formData.append('birthdate', user.birthdate);
-      formData.append('height', user.height);
-      formData.append('weight', user.weight);
+      formData.append('birthdate', (user.birthdate === "private" || user.birthdate === "") ? "null" : user.birthdate);
+      formData.append('height', (user.height === "private" || user.height === "") ? "null" : user.height);
+      formData.append('weight', (user.weight === "private" || user.weight === "") ? "null" : user.weight);
       formData.append('isPrivate', user.isPrivate);
-  
       if (user.newPassword) {
         formData.append('password', user.password);
         formData.append('newPassword', user.newPassword);
       }
-      
       if (user.avatar instanceof File) {
-        formData.append('avatar', user.avatar); // 파일만 따로 어펜드
+        formData.append('avatar', user.avatar);
       } else if (user.avatar === null) {
-        formData.append('avatarDelete', true); // ✅ 삭제 요청 신호
+        formData.append('avatarDelete', true);
       }
-  
+
       await axiosInstance.put(`/api/users/profile`, formData, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-  
-      // setSuccessMessage("프로필이 성공적으로 업데이트되었습니다.");
+
       toast.success("프로필이 업데이트되었습니다.");
-  
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
-  
       setIsSaving(false);
     } catch (error) {
       console.error("프로필 업데이트 실패:", error);
-      const serverMessage = error.response?.data?.message || "프로필 업데이트 중 오류가 발생했습니다.";
-    toast.error(serverMessage);
-    setIsSaving(false);
+      toast.error(error.response?.data?.message || "업데이트 중 오류 발생");
+      setIsSaving(false);
     }
-  }
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#6ca7af]"></div>
-      </div>
-    )
-  }
+  if (isLoading) return <div className="flex justify-center items-center h-64"><div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-[#6ca7af] rounded-full"></div></div>;
 
   return (
     <div className="space-y-6">
@@ -350,75 +285,86 @@ export default function ProfilePage() {
 
             {/* 성별 */}
             <div>
-              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
-                <Users className="inline-block w-4 h-4 mr-1" />
-                성별
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={user.gender || ""}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-              >
-                <option value="">선택하세요</option>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-              </select>
-            </div>
+          <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+            <Users className="inline-block w-4 h-4 mr-1" />성별
+          </label>
+          <select
+            id="gender"
+            name="gender"
+            value={user.gender}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+          >
+            <option value="">선택하세요</option>
+            <option value="male">남성</option>
+            <option value="female">여성</option>
+            <option value="private">비공개</option>
+          </select>
+        </div>
 
             {/* 생년월일 */}
             <div>
-              <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
-                <Calendar className="inline-block w-4 h-4 mr-1" />
-                생년월일
-              </label>
-              <input
-                id="birthdate"
-                name="birthdate"
-                type="date"
-                value={user.birthdate || ""}
-                onChange={handleChange}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-              />
-            </div>
+          <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">
+            <Calendar className="inline-block w-4 h-4 mr-1" />생년월일
+          </label>
+          <input
+            id="birthdate"
+            name="birthdate"
+            type="date"
+            value={user.birthdate === "private" ? "" : user.birthdate}
+            onChange={handleChange}
+            disabled={user.birthdate === "private"}
+            required={user.birthdate !== "private"}
+            className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+          />
+          <button type="button" onClick={() => togglePrivate("birthdate")} className="text-xs text-gray-500 underline">
+            {user.birthdate === "private" ? "입력하기" : "비공개"}
+          </button>
+        </div>
 
             {/* 키 */}
             <div>
-              <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
-                <Ruler className="inline-block w-4 h-4 mr-1" />키 (cm)
-              </label>
-              <input
-                id="height"
-                name="height"
-                type="number"
-                value={user.height || ""}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${
-                  errors.height ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
-              />
-              {errors.height && <p className="mt-1 text-sm text-red-600">{errors.height}</p>}
-            </div>
+          <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
+            <Ruler className="inline-block w-4 h-4 mr-1" />키 (cm)
+          </label>
+          <input
+            id="height"
+            name="height"
+            type="number"
+            value={user.height === "private" ? "" : user.height}
+            onChange={handleChange}
+            disabled={user.height === "private"}
+            required={user.height !== "private"} 
+            className={`w-full px-4 py-2 rounded-md border ${errors.height ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
+            placeholder="예: 175"
+          />
+          <button type="button" onClick={() => togglePrivate("height")} className="text-xs text-gray-500 underline">
+            {user.height === "private" ? "입력하기" : "비공개"}
+          </button>
+          {errors.height && <p className="mt-1 text-sm text-red-600">{errors.height}</p>}
+        </div>
 
             {/* 몸무게 */}
             <div>
-              <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
-                <Weight className="inline-block w-4 h-4 mr-1" />
-                몸무게 (kg)
-              </label>
-              <input
-                id="weight"
-                name="weight"
-                type="number"
-                value={user.weight || ""}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-md border ${
-                  errors.weight ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
-              />
-              {errors.weight && <p className="mt-1 text-sm text-red-600">{errors.weight}</p>}
-            </div>
+          <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+            <Weight className="inline-block w-4 h-4 mr-1" />몸무게 (kg)
+          </label>
+          <input
+            id="weight"
+            name="weight"
+            type="number"
+            value={user.weight === "private" ? "" : user.weight}
+            onChange={handleChange}
+            disabled={user.weight === "private"}
+            required={user.weight !== "private"}
+            className={`w-full px-4 py-2 rounded-md border ${errors.weight ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent`}
+            placeholder="예: 65"
+          />
+          <button type="button" onClick={() => togglePrivate("weight")} className="text-xs text-gray-500 underline">
+            {user.weight === "private" ? "입력하기" : "비공개"}
+          </button>
+          {errors.weight && <p className="mt-1 text-sm text-red-600">{errors.weight}</p>}
+        </div>
 
             {/* 프로필 공개 여부 - 토글 스위치 */}
             <div className="md:col-span-2">

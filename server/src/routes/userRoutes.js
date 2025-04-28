@@ -21,20 +21,18 @@ router.put('/profile', authMiddleware, upload.single('avatar'), async (req, res)
   try {
     const user = await User.findById(req.user.id);
 
-    // 텍스트 필드 업데이트
     const { username, email, gender, birthdate, height, weight, isPrivate, password, newPassword } = req.body;
 
     if (username) user.username = username;
     if (email) user.email = email;
-    if (gender) user.gender = gender;
-    if (birthdate) user.birthdate = birthdate;
-    if (height) user.height = height;
-    if (weight) user.weight = weight;
-    if (isPrivate !== undefined) user.isPrivate = isPrivate === 'true'; // FormData는 문자열로 오니까 변환 필요
+    if (gender !== undefined) user.gender = (gender === 'private' || gender === '' || gender === 'null') ? null : gender;
+    if (birthdate !== undefined) user.birthdate = (birthdate === 'private' || birthdate === '' || birthdate === 'null') ? null : birthdate;
+    if (height !== undefined) user.height = (height === 'private' || height === '' || height === 'null') ? null : height;
+    if (weight !== undefined) user.weight = (weight === 'private' || weight === '' || weight === 'null') ? null : weight;
+    if (isPrivate !== undefined) user.isPrivate = isPrivate === 'true'; // 문자열 변환
 
     // 비밀번호 변경
     if (newPassword) {
-      // 1. 현재 비밀번호 검증
       if (!password) {
         return res.status(400).json({ message: '현재 비밀번호를 입력해주세요.' });
       }
@@ -44,22 +42,20 @@ router.put('/profile', authMiddleware, upload.single('avatar'), async (req, res)
         return res.status(400).json({ message: '현재 비밀번호가 일치하지 않습니다.' });
       }
 
-      // 2. 새 비밀번호 암호화
       const salt = await bcrypt.genSalt(10);
       const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-
       user.password = hashedNewPassword;
     }
 
     // avatar 업데이트
     if (req.file && req.file.path) {
-      user.avatar = req.file.path; // Cloudinary가 반환하는 URL
+      user.avatar = req.file.path;
     }
 
     if (req.body.avatarDelete === 'true') {
       user.avatar = null;
     }
-    
+
     await user.save();
 
     res.json({ message: '프로필 업데이트 완료', user });
