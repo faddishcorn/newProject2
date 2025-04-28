@@ -1,5 +1,7 @@
 import { memo } from "react"
 import { Plus, Save, X } from "lucide-react"
+import { toast } from "react-toastify";
+
 // 루틴 편집 컴포넌트 (AI 생성 루틴과 새 루틴 생성에서 공통으로 사용)
 const RoutineEditor = memo(function RoutineEditor({
   routine,
@@ -10,7 +12,33 @@ const RoutineEditor = memo(function RoutineEditor({
   onRemoveExercise,
   onCancel,
   onSave,
-}) {
+})
+ {
+  const handleSave = () => {
+    // 저장하기 전에 입력값 검증
+    for (const exercise of routine.exercises) {
+      if (!routine.title.trim()) {
+        toast.error("루틴 이름을 입력하세요.");
+        return;
+      }
+      if (!exercise.name.trim()) {
+        toast.error("운동 이름을 입력하세요.");
+        return;
+      }
+      if (!exercise.sets || exercise.sets < 1) {
+        toast.error("세트 수는 1 이상이어야 합니다.");
+        return;
+      }
+      if (!exercise.reps || exercise.reps < 1) {
+        toast.error("반복 횟수는 1 이상이어야 합니다.");
+        return;
+      }
+    }
+  
+    // 검증 통과하면 저장 실행
+    onSave(routine);
+  };
+  
   if (!routine) return null;
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
@@ -24,6 +52,7 @@ const RoutineEditor = memo(function RoutineEditor({
           value={routine.title}
           onChange={(e) => onChangeTitle(e, isNew)}
           className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+          required
         />
       </div>
 
@@ -44,57 +73,63 @@ const RoutineEditor = memo(function RoutineEditor({
           {routine.exercises.map((exercise) => (
             <div key={exercise.id || exercise._id} className="p-4 border rounded-lg">
               <div className="flex justify-between items-start mb-3">
-                <input
-                  type="text"
-                  value={exercise.name}
-                  onChange={(e) => onChangeExercise(exercise.id || exercise._id, "name", e.target.value, isNew)}
-                  className="font-medium text-gray-800 px-2 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-                />
-                <button
-                  onClick={() => onRemoveExercise(exercise.id || exercise._id, isNew)}
-                  className="p-1 rounded-full hover:bg-gray-100 text-red-500"
-                  title="운동 삭제"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+  <div className="flex-1">
+    <label className="block text-xs text-gray-500 mb-1">운동명</label>
+    <input
+      type="text"
+      value={exercise.name}
+      onChange={(e) => onChangeExercise(exercise.id || exercise._id, "name", e.target.value, isNew)}
+      className="font-medium text-gray-800 px-2 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+      required
+    />
+  </div>
+  <button
+    onClick={() => onRemoveExercise(exercise.id || exercise._id, isNew)}
+    className="p-1 rounded-full hover:bg-gray-100 text-red-500 ml-2"
+    title="운동 삭제"
+  >
+    <X size={16} />
+  </button>
+</div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">세트</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={exercise.sets}
-                    onChange={(e) =>
-                      onChangeExercise(
-                        exercise.id || exercise._id,
-                        "sets",
-                        Number.parseInt(e.target.value) || 1,
-                        isNew
-                      )
-                    }
-                    className="w-full px-3 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">반복 횟수</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={exercise.reps}
-                    onChange={(e) =>
-                      onChangeExercise(
-                        exercise.id || exercise._id,
-                        "reps",
-                        Number.parseInt(e.target.value) || 1,
-                        isNew
-                      )
-                    }
-                    className="w-full px-3 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-                  />
-                </div>
-              </div>
+  <div>
+    <label className="block text-xs text-gray-500 mb-1">세트</label>
+    <input
+      type="number"
+      min="1"
+      value={exercise.sets === 0 ? "" : exercise.sets}
+      onChange={(e) =>
+        onChangeExercise(
+          exercise.id || exercise._id,
+          "sets",
+          e.target.value === "" ? "" : Number(e.target.value),
+          isNew
+        )
+      }
+      required
+      className="w-full px-3 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+    />
+  </div>
+  <div>
+    <label className="block text-xs text-gray-500 mb-1">반복 횟수</label>
+    <input
+      type="number"
+      min="1"
+      value={exercise.reps === 0 ? "" : exercise.reps}
+      onChange={(e) =>
+        onChangeExercise(
+          exercise.id || exercise._id,
+          "reps",
+          e.target.value === "" ? "" : Number(e.target.value),
+          isNew
+        )
+      }
+      required
+      className="w-full px-3 py-1 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+    />
+  </div>
+</div>
             </div>
           ))}
 
@@ -114,7 +149,7 @@ const RoutineEditor = memo(function RoutineEditor({
           취소
         </button>
         <button
-          onClick={() => onSave(routine)}
+          onClick={handleSave}
           className="flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors"
           style={{ backgroundColor: "#6ca7af" }}
         >

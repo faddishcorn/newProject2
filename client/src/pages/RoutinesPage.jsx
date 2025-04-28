@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, memo } from "react"
-import { Trash2, Plus, Send, X, Save, Loader } from "lucide-react"
+import { Trash2, Plus, Send, X, Save, Loader, AlertTriangle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import RoutineEditor from "../components/RoutineEditor"
@@ -20,7 +20,8 @@ export default function RoutinesPage() {
   const textareaRef = useRef(null)
   const navigate = useNavigate()
   const [error, setError] = useState(null)
-
+  const [routineToDelete, setRoutineToDelete] = useState(null); 
+  
   // 텍스트 영역 자동 크기 조절
   useEffect(() => {
     if (textareaRef.current) {
@@ -417,10 +418,10 @@ const handleRoutineTitleChange = (e, isNew = false) => {
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold text-gray-800">{routine.title}</h3>
                 <button
-                  onClick={() => handleDeleteRoutine(routine._id)}
-                  className="p-1 rounded-full hover:bg-gray-100 text-red-500"
-                  title="루틴 삭제"
-                >
+  onClick={() => setRoutineToDelete(routine._id)} // 클릭 시 루틴 ID만 저장
+  className="p-1 rounded-full hover:bg-gray-100 text-red-500"
+  title="루틴 삭제"
+>
                   <Trash2 size={16} />
                 </button>
               </div>
@@ -457,6 +458,41 @@ const handleRoutineTitleChange = (e, isNew = false) => {
             <p>저장된 루틴이 없습니다. 새 루틴을 만들어보세요!</p>
           </div>
         )}
+        {routineToDelete && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 animate-fade-in">
+      <div className="flex items-center text-red-500 mb-4">
+        <AlertTriangle className="h-6 w-6 mr-2" />
+        <h3 className="text-lg font-bold">루틴 삭제 확인</h3>
+      </div>
+
+      <p className="text-gray-700 mb-6">
+        정말로 이 루틴을 삭제하시겠습니까? 삭제 후 복구는 불가능합니다.
+      </p>
+
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={() => setRoutineToDelete(null)}
+          className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            await handleDeleteRoutine(routineToDelete);
+            setRoutineToDelete(null);
+          }}
+          className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+        >
+          루틴 삭제
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </div>
   )
