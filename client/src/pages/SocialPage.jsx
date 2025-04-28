@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Search, UserPlus, UserMinus, UserCheck, X, Check, ExternalLink } from "lucide-react"
 import DefaultAvatar from "../components/DefaultAvatar"
+import { toast } from "react-toastify"
 
 export default function SocialPage() {
   const [activeTab, setActiveTab] = useState("following")
@@ -14,7 +15,8 @@ export default function SocialPage() {
   const [sentRequests, setSentRequests] = useState([])
   const [followers, setFollowers] = useState([])
   const [receivedRequests, setReceivedRequests] = useState([])
-  const [searchResults, setSearchResults] = useState([]) //
+  const [searchResults, setSearchResults] = useState([]) 
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +25,8 @@ export default function SocialPage() {
   
   const fetchAll = async () => {
     try {
+      setIsLoading(true);
+
       const [fRes, frRes, srRes, rrRes] = await Promise.all([
         axios.get(`/api/social/followings`),
         axios.get(`/api/social/followers`),
@@ -35,56 +39,64 @@ export default function SocialPage() {
       setReceivedRequests(rrRes.data)
     } catch (err) {
       console.error("소셜 데이터 로딩 실패", err)
+      toast.error("소셜 데이터 불러오기 실패, 다시 시도해주세요😥");
+    } finally {
+      setIsLoading(false); 
     }
   }
 
   // 언팔로우 처리
   const handleUnfollow = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`, authHeader)
+      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
       fetchAll()
     } catch (err) {
       console.error("언팔로우 실패", err)
+      toast.error("언팔로우 실패, 다시 시도해주세요😢");
     }
   }
 
   // 요청 취소 처리
   const handleCancelRequest = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`, authHeader)
+      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
       fetchAll()
     } catch (err) {
       console.error("요청 취소 실패", err)
+      toast.error("요청 취소 실패, 다시 시도해주세요😢");
     }
   }
 
   // 팔로워 삭제 처리
   const handleRemoveFollower = async (userId) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`, authHeader);
+      await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/followers/${userId}`);
       setFollowers(followers.filter((user) => user._id !== userId)); // ✅ user.id -> user._id
     } catch (err) {
       console.error("팔로워 삭제 실패", err);
+      toast.error("팔로워 삭제 실패, 다시 시도해주세요😢");
     }
   }
 
   // 팔로워 요청 수락 처리
   const handleAcceptRequest = async (userId) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`, {}, authHeader)
+      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/accept`, {})
       fetchAll()
     } catch (err) {
       console.error("요청 수락 실패", err)
+      toast.error("요청 수락 실패, 다시 시도해주세요😢");
     }
   }
 
   // 팔로워 요청 거절 처리
   const handleRejectRequest = async (userId) => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`, {}, authHeader)
+      await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}/reject`, {})
       fetchAll()
     } catch (err) {
       console.error("요청 거절 실패", err)
+      toast.error("요청 거절 실패, 다시 시도해주세요😢");
     }
   }
 
@@ -92,11 +104,12 @@ export default function SocialPage() {
   const handleSearch = async (e) => {
     e.preventDefault()
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`, authHeader)
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`)
       setSearchResults(res.data)
       setHasSearched(true)
     } catch (err) {
       console.error("검색 실패", err)
+      toast.error("검색 실패, 다시 시도해주세요😢");
     }
   }
 
@@ -104,11 +117,11 @@ export default function SocialPage() {
   const handleToggleFollow = async (userId, status) => {
     try {
       if (status === "none") {
-        await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request`, { targetId: userId }, authHeader)
+        await axios.post(`${import.meta.env.VITE_API_BASE}/api/social/request`, { targetId: userId })
       } else if (status === "requested") {
-        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`, authHeader)
+        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/request/${userId}`)
       } else if (status === "following") {
-        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`, authHeader)
+        await axios.delete(`${import.meta.env.VITE_API_BASE}/api/social/unfollow/${userId}`)
       }
       if (activeTab === "find") {
         handleSearch({ preventDefault: () => {} });
@@ -116,6 +129,7 @@ export default function SocialPage() {
       fetchAll();
     } catch (err) {
       console.error("팔로우 상태 변경 실패", err)
+      toast.error("팔로우 상태 변경 실패, 다시 시도해주세요😢");
     }
   }
 
@@ -124,6 +138,7 @@ export default function SocialPage() {
     const userId = user._id || user.id; // 둘 중 하나라도 있으면 사용
     if (!userId) {
       console.error("방문하려는 유저의 ID가 없습니다.", user);
+      toast.error("방문하려는 유저의 ID가 없습니다.");
       return;
     }
     navigate(`/workout-logs/${userId}`);
@@ -178,6 +193,14 @@ export default function SocialPage() {
     } else {
       return <DefaultAvatar username={user.username} />
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#6ca7af]"></div>
+      </div>
+    );
   }
 
   return (
