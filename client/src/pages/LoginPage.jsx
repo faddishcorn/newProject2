@@ -91,12 +91,12 @@ export default function LoginPage() {
                 <label htmlFor="password" className="text-sm font-medium">
                   비밀번호
                 </label>
-                <a
+                {/* <a
                   href="/forgot-password"
                   className="text-xs underline hover:underline-offset-4"
                 >
                   비밀번호 찾기
-                </a>
+                </a> */}
               </div>
               <input
                 id="password"
