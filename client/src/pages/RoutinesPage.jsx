@@ -455,7 +455,7 @@ export default function RoutinesPage() {
           className="flex items-center px-4 py-2 rounded-md text-white font-medium transition-colors"
           style={{ backgroundColor: "#6ca7af" }}
         >
-          <Plus size={18} className="mr-2" />새 루틴 만들기
+          <Plus size={18} className="mr-2" />직접 만들기
         </button>
       </div>
 
