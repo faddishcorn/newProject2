@@ -9,6 +9,7 @@ import laptop from "../assets/laptop.png"
 import mobile from "../assets/mobile.png"
 import demoVideo from "../assets/demoVid.mp4"
 import mobile_routine from "../assets/mobile_2.png"
+import logo from "../assets/logo.png"
 
 export default function LandingPage() {
   useEffect(() => {
@@ -56,8 +57,7 @@ export default function LandingPage() {
       <header className="header">
         <div className="header-container">
           <div className="logo">
-          <h1>바디플랜</h1>
-          {/* 로고 이미지 위치 (200x60px 권장) */}
+          <img src={logo} alt="logo" />
         </div>
         <div className="nav-buttons">
           <button className="login-btn" onClick={() => navigate("/login")}>

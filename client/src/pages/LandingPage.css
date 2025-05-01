@@ -54,10 +54,16 @@
   display: flex;
   justify-content: space-between;
 }
-.landing-page .logo h1 {
-  color: var(--primary);
-  font-weight: 700;
-  font-size: 1.8rem;
+
+.landing-page .logo {
+  display: flex;
+  align-items: center;
+}
+
+.landing-page .logo img {
+  height: 35px;   
+  width: auto;    
+  
 }
 
 .landing-page .nav-buttons {

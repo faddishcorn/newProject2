@@ -55,7 +55,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background pt-12 pb-12">
       <div className="absolute top-4 left-4 md:top-8 md:left-8">
         <a href="/" className="flex items-center space-x-2">
           <img src={logo} alt="로고" className="h-17 w-20" />
