@@ -1,7 +1,6 @@
 import Button from "../components/Button";
 import logo from "../assets/logo.png";
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 

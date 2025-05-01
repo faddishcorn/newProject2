@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 export default function SignupPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -44,13 +45,15 @@ export default function SignupPage() {
       setMessage("비밀번호는 문자와 숫자가 모두 포함되어야 합니다.");
       return;
     }
-
+    setIsLoading(true);
     try {
       const res = await axiosInstance.post(`/api/auth/signup`, form);
       setMessage(res.data.message);
       navigate("/login");
     } catch (err) {
       setMessage(err.response?.data?.message || "회원가입 실패");
+    } finally {
+      setIsLoading(false); // 요청 끝나면 로딩 해제
     }
   };
 
@@ -262,8 +265,16 @@ export default function SignupPage() {
           <Button
             className="w-full bg-primary hover:bg-primary/90"
             type="submit"
+            disabled={isLoading}
           >
-            회원가입
+            {isLoading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                <span>회원가입 중...</span>
+              </div>
+            ) : (
+              "회원가입"
+            )}
           </Button>
           {message && (
             <p className="text-red-500 text-sm text-center mt-2">{message}</p>
