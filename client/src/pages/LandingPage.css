@@ -18,6 +18,9 @@
   overflow-x: hidden;
   width: 100%;
 }
+body {
+  font-family: "Noto Sans KR", sans-serif;
+}
 
 /* 2) 리셋도 .landing-page 내부 요소에만 적용 */
 .landing-page *,
