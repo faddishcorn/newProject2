@@ -9,7 +9,7 @@
 
 ## 미리보기
 
-![preview](./client/src/assets/mobile_2.png)  
+<img src="./client/src/assets/mobile_2.png" width="250" />
 
 ## 기술 스택
 
