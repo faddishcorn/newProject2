@@ -5,7 +5,10 @@ const User = require("../models/User");
 // ✅ 내 팔로잉 목록 가져오기
 const getFollowings = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("following", "username avatar gender");
+    const user = await User.findById(req.user.id).populate(
+      "following",
+      "username avatar gender",
+    );
     res.json(user.following);
   } catch (err) {
     res.status(500).json({ message: "팔로잉 목록을 불러올 수 없습니다." });
@@ -15,7 +18,10 @@ const getFollowings = async (req, res) => {
 // ✅ 내 팔로워 목록 가져오기
 const getFollowers = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("followers", "username avatar gender");
+    const user = await User.findById(req.user.id).populate(
+      "followers",
+      "username avatar gender",
+    );
     res.json(user.followers);
   } catch (err) {
     res.status(500).json({ message: "팔로워 목록을 불러올 수 없습니다." });
@@ -25,7 +31,10 @@ const getFollowers = async (req, res) => {
 // ✅ 내가 보낸 팔로우 요청
 const getSentRequests = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("sentRequests", "username avatar gender");
+    const user = await User.findById(req.user.id).populate(
+      "sentRequests",
+      "username avatar gender",
+    );
     res.json(user.sentRequests);
   } catch (err) {
     res.status(500).json({ message: "보낸 요청을 불러올 수 없습니다." });
@@ -35,7 +44,10 @@ const getSentRequests = async (req, res) => {
 // ✅ 내가 받은 팔로우 요청
 const getReceivedRequests = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("receivedRequests", "username avatar gender");
+    const user = await User.findById(req.user.id).populate(
+      "receivedRequests",
+      "username avatar gender",
+    );
     res.json(user.receivedRequests);
   } catch (err) {
     res.status(500).json({ message: "받은 요청을 불러올 수 없습니다." });
@@ -87,14 +99,17 @@ const sendFollowRequest = async (req, res) => {
     const user = await User.findById(req.user.id);
     const target = await User.findById(targetId);
 
-    if (!target) return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    if (!target)
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
 
     if (
       user.following.includes(targetId) ||
       user.sentRequests.includes(targetId) ||
       target.receivedRequests.includes(req.user.id)
     ) {
-      return res.status(400).json({ message: "이미 팔로우 요청 중이거나 팔로우 상태입니다." });
+      return res
+        .status(400)
+        .json({ message: "이미 팔로우 요청 중이거나 팔로우 상태입니다." });
     }
 
     if (target.isPrivate) {
@@ -125,8 +140,12 @@ const cancelFollowRequest = async (req, res) => {
     const user = await User.findById(req.user.id);
     const target = await User.findById(targetId);
 
-    user.sentRequests = user.sentRequests.filter((id) => id.toString() !== targetId);
-    target.receivedRequests = target.receivedRequests.filter((id) => id.toString() !== req.user.id);
+    user.sentRequests = user.sentRequests.filter(
+      (id) => id.toString() !== targetId,
+    );
+    target.receivedRequests = target.receivedRequests.filter(
+      (id) => id.toString() !== req.user.id,
+    );
 
     await user.save();
     await target.save();
@@ -147,8 +166,12 @@ const acceptFollowRequest = async (req, res) => {
     user.followers.push(targetId);
     target.following.push(user._id);
 
-    user.receivedRequests = user.receivedRequests.filter((id) => id.toString() !== targetId);
-    target.sentRequests = target.sentRequests.filter((id) => id.toString() !== req.user.id);
+    user.receivedRequests = user.receivedRequests.filter(
+      (id) => id.toString() !== targetId,
+    );
+    target.sentRequests = target.sentRequests.filter(
+      (id) => id.toString() !== req.user.id,
+    );
 
     await user.save();
     await target.save();
@@ -166,8 +189,12 @@ const rejectFollowRequest = async (req, res) => {
     const user = await User.findById(req.user.id);
     const target = await User.findById(targetId);
 
-    user.receivedRequests = user.receivedRequests.filter((id) => id.toString() !== targetId);
-    target.sentRequests = target.sentRequests.filter((id) => id.toString() !== req.user.id);
+    user.receivedRequests = user.receivedRequests.filter(
+      (id) => id.toString() !== targetId,
+    );
+    target.sentRequests = target.sentRequests.filter(
+      (id) => id.toString() !== req.user.id,
+    );
 
     await user.save();
     await target.save();
@@ -186,7 +213,9 @@ const unfollowUser = async (req, res) => {
     const target = await User.findById(targetId);
 
     user.following = user.following.filter((id) => id.toString() !== targetId);
-    target.followers = target.followers.filter((id) => id.toString() !== req.user.id);
+    target.followers = target.followers.filter(
+      (id) => id.toString() !== req.user.id,
+    );
 
     await user.save();
     await target.save();
@@ -204,13 +233,16 @@ const removeFollower = async (req, res) => {
     const user = await User.findById(req.user.id);
     const target = await User.findById(targetId);
 
-    if (!target) return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    if (!target)
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
 
     // 나를 팔로우한 사람 목록에서 제거
     user.followers = user.followers.filter((id) => id.toString() !== targetId);
 
     // 그 사람의 following 목록에서도 나를 제거
-    target.following = target.following.filter((id) => id.toString() !== req.user.id);
+    target.following = target.following.filter(
+      (id) => id.toString() !== req.user.id,
+    );
 
     await user.save();
     await target.save();

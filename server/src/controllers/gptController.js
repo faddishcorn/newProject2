@@ -1,5 +1,5 @@
-const axios = require('axios');
-const User = require('../models/User');
+const axios = require("axios");
+const User = require("../models/User");
 
 const generateRoutine = async (req, res) => {
   const { prompt } = req.body;
@@ -42,26 +42,26 @@ const generateRoutine = async (req, res) => {
 `;
 
     const openaiRes = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-3.5-turbo",
-        messages: [
-          { role: "user", content: systemPrompt },
-        ],
+        messages: [{ role: "user", content: systemPrompt }],
         temperature: 0.7,
       },
       {
         headers: {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
-      }
+      },
     );
 
     const raw = openaiRes.data.choices[0].message.content;
     const matched = raw.match(/\{.*\}|\[.*\]/s);
 
     if (!matched) {
-      return res.status(400).json({ message: "운동 루틴 형식을 인식하지 못했습니다." });
+      return res
+        .status(400)
+        .json({ message: "운동 루틴 형식을 인식하지 못했습니다." });
     }
 
     const parsed = JSON.parse(matched[0]);
@@ -69,9 +69,10 @@ const generateRoutine = async (req, res) => {
     if (Array.isArray(parsed)) {
       return res.status(200).json(parsed); // ✅ 배열 그대로 반환
     } else {
-      return res.status(400).json({ message: parsed.message || "운동 루틴이 아닙니다." });
+      return res
+        .status(400)
+        .json({ message: parsed.message || "운동 루틴이 아닙니다." });
     }
-
   } catch (error) {
     console.error("GPT 호출 실패:", error.response?.data || error.message);
     res.status(500).json({ message: "요청 중 오류 발생" });

@@ -143,7 +143,7 @@ export default function WorkoutLogPage() {
       console.error("운동 기록 조회 실패", error);
       setDailyRoutines([]);
     } finally {
-    setIsWorkoutLogLoading(false);
+      setIsWorkoutLogLoading(false);
     }
   };
 
@@ -534,15 +534,14 @@ export default function WorkoutLogPage() {
 
   // 운동 기록 렌더링
   const renderWorkoutLogs = () => {
-
     if (isWorkoutLogLoading) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm p-6 h-full flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af] mb-2"></div>
-        <p className="text-gray-500">운동 기록을 불러오는 중입니다...</p>
-      </div>
-    );
-  }
+      return (
+        <div className="bg-white rounded-lg shadow-sm p-6 h-full flex flex-col items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af] mb-2"></div>
+          <p className="text-gray-500">운동 기록을 불러오는 중입니다...</p>
+        </div>
+      );
+    }
 
     if (dailyRoutines.length === 0) {
       return (

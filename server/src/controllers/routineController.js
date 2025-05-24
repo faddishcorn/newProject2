@@ -1,4 +1,4 @@
-const UserRoutine = require('../models/UserRoutine');
+const UserRoutine = require("../models/UserRoutine");
 const DailyRoutine = require("../models/Routine");
 
 const getMyRoutines = async (req, res) => {
@@ -16,7 +16,7 @@ const createRoutine = async (req, res) => {
     const routine = new UserRoutine({
       userId: req.user.id,
       title,
-      exercises
+      exercises,
     });
     await routine.save();
     res.status(201).json(routine);
@@ -29,9 +29,10 @@ const deleteRoutine = async (req, res) => {
   try {
     const routine = await UserRoutine.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user.id
+      userId: req.user.id,
     });
-    if (!routine) return res.status(404).json({ message: "루틴을 찾을 수 없습니다" });
+    if (!routine)
+      return res.status(404).json({ message: "루틴을 찾을 수 없습니다" });
     res.json({ message: "루틴이 삭제되었습니다" });
   } catch (err) {
     res.status(500).json({ message: "루틴 삭제 실패" });
@@ -44,9 +45,10 @@ const updateRoutine = async (req, res) => {
     const routine = await UserRoutine.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       { title, exercises },
-      { new: true }
+      { new: true },
     );
-    if (!routine) return res.status(404).json({ message: "루틴을 찾을 수 없습니다" });
+    if (!routine)
+      return res.status(404).json({ message: "루틴을 찾을 수 없습니다" });
     res.json(routine);
   } catch (err) {
     res.status(500).json({ message: "루틴 수정 실패" });
@@ -87,5 +89,5 @@ module.exports = {
   createRoutine,
   deleteRoutine,
   updateRoutine,
-  saveRoutineHistory
+  saveRoutineHistory,
 };
