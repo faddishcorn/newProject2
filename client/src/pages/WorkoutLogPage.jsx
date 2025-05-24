@@ -44,6 +44,7 @@ export default function WorkoutLogPage() {
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [isWorkoutLogLoading, setIsWorkoutLogLoading] = useState(false);
 
   const commentInputRef = useRef(null);
 
@@ -132,7 +133,7 @@ export default function WorkoutLogPage() {
   // 선택한 날짜의 운동 기록 가져오기
   const fetchDailyRoutines = async (date, targetId) => {
     try {
-      setIsLoading(true);
+      setIsWorkoutLogLoading(true);
       const formattedDate = formatDate(date);
       const res = await axiosInstance.get(
         `/api/workout-logs/${targetId}/${formattedDate}`,
@@ -142,7 +143,7 @@ export default function WorkoutLogPage() {
       console.error("운동 기록 조회 실패", error);
       setDailyRoutines([]);
     } finally {
-    setIsLoading(false);
+    setIsWorkoutLogLoading(false);
     }
   };
 
@@ -534,7 +535,7 @@ export default function WorkoutLogPage() {
   // 운동 기록 렌더링
   const renderWorkoutLogs = () => {
 
-    if (isLoading) {
+    if (isWorkoutLogLoading) {
     return (
       <div className="flex justify-center items-center h-full py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af]"></div>
