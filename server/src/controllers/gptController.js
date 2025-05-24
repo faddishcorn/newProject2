@@ -21,7 +21,7 @@ const generateRoutine = async (req, res) => {
 
 요청 내용: ${prompt}
 
-다음 형식으로 배열 형태로만 응답하세요 (설명 없이 JSON만 반환):
+다음 형식으로 배열 형태로만 응답하세요 (운동이름은 한글로) (설명 없이 JSON만 반환):
 \`\`\`json
 [
   { "name": "운동이름", "sets": 3, "reps": 12 },
