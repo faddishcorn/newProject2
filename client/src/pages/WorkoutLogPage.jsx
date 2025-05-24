@@ -537,9 +537,9 @@ export default function WorkoutLogPage() {
 
     if (isWorkoutLogLoading) {
     return (
-      <div className="flex justify-center items-center h-full py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af]"></div>
-        <p className="ml-2 text-gray-500">운동 기록을 불러오는 중입니다...</p>
+      <div className="bg-white rounded-lg shadow-sm p-6 h-full flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af] mb-2"></div>
+        <p className="text-gray-500">운동 기록을 불러오는 중입니다...</p>
       </div>
     );
   }
