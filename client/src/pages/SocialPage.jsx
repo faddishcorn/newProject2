@@ -26,6 +26,7 @@ export default function SocialPage() {
   const [receivedRequests, setReceivedRequests] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -124,6 +125,7 @@ export default function SocialPage() {
   // 검색 처리
   const handleSearch = async (e) => {
     e.preventDefault();
+    setIsSearching(true);
     try {
       const res = await axiosInstance.get(
         `${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`,
@@ -133,6 +135,9 @@ export default function SocialPage() {
     } catch (err) {
       console.error("검색 실패", err);
       toast.error("검색 실패, 다시 시도해주세요😢");
+    } finally {
+      setIsSearching(false);
+      setHasSearched(true);
     }
   };
 
@@ -530,9 +535,13 @@ export default function SocialPage() {
               />
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md bg-[#6ca7af] text-white hover:bg-[#5a8f96] transition-colors"
+                className="px-4 py-2 rounded-md bg-[#6ca7af] text-white hover:bg-[#5a8f96] transition-colors flex items-center justify-center"
               >
-                <Search size={18} />
+                {isSearching ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                ) : (
+                  <Search size={18} />
+                )}
               </button>
             </form>
 
