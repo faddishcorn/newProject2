@@ -59,7 +59,9 @@ const saveRoutineHistory = async (req, res) => {
   const userId = req.user.id;
   const { title, exercises } = req.body;
 
-  const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+  const today = new Date(Date.now() + 9 * 60 * 60 * 1000) // UTC+9
+  .toISOString()
+  .split("T")[0];
 
   try {
     let record = await DailyRoutine.findOne({ userId, date: today });
