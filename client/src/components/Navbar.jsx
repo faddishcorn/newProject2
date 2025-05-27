@@ -21,9 +21,9 @@ export default function Navbar() {
 
   const menuItems = [
     { name: "메인", path: "/main", icon: <Home size={20} /> },
-    { name: "소셜", path: "/social", icon: <Users size={20} /> },
     { name: "루틴관리", path: "/routines", icon: <Calendar size={20} /> },
     { name: "내정보", path: "/profile", icon: <User size={20} /> },
+    { name: "소셜", path: "/social", icon: <Users size={20} /> },
     { name: "운동기록", path: "/workout-logs", icon: <BarChart2 size={20} /> },
   ];
 
