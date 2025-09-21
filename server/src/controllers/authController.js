@@ -39,7 +39,7 @@ const signup = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ message: "회원가입 성공" });
+    res.status(201).json({ message: "회원가입 성공" }); 
   } catch (error) {
     console.error("회원가입 오류:", error);
     res.status(500).json({ message: "서버 오류" });
