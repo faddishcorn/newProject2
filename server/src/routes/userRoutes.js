@@ -4,6 +4,7 @@ const upload = require("../middleware/uploadMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // ✅ 내 프로필 조회
 router.get("/profile", authMiddleware, async (req, res) => {
@@ -112,18 +113,30 @@ router.delete("/account", authMiddleware, async (req, res) => {
   }
 });
 
-router.get("/:id", authMiddleware, async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
     if (!user) {
       return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
     }
 
-    const currentUserId = req.user.id; // authMiddleware에서 토큰 파싱해서 req.user에 저장
-    const isFollowing = user.followers.includes(currentUserId); // 이 유저의 followers 목록에 내가 있는지 확인
+    // 토큰이 있는 경우에만 isFollowing 체크
+    let isFollowing = false;
+    if (req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const currentUserId = decoded.id;
+        isFollowing = user.followers.includes(currentUserId);
+      } catch (err) {
+        // 토큰이 유효하지 않은 경우 무시하고 계속 진행
+        console.log("토큰 검증 실패:", err.message);
+      }
+    }
+
     res.json({
-      ...user.toObject(), // user를 plain JS 객체로 변환해서 펼치고
-      isFollowing, // 🔥 추가
+      ...user.toObject(),
+      isFollowing,
     });
   } catch (error) {
     console.error("다른 사용자 프로필 조회 오류:", error);

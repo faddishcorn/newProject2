@@ -18,6 +18,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const isAuthenticated = !!localStorage.getItem("token");
 
   const menuItems = [
     { name: "메인", path: "/main", icon: <Home size={20} /> },
@@ -76,15 +77,25 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Logout button (desktop) */}
+          {/* Login/Logout button (desktop) */}
           <div className="hidden md:block">
-            <button
-              onClick={handleLogout}
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-[#5a8f96] transition-colors"
-            >
-              <LogOut size={20} className="mr-2" />
-              로그아웃
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-[#5a8f96] transition-colors"
+              >
+                <LogOut size={20} className="mr-2" />
+                로그아웃
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-[#5a8f96] transition-colors"
+              >
+                <User size={20} className="mr-2" />
+                로그인
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -121,14 +132,25 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* Logout button (mobile) */}
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#5a8f96] transition-colors"
-            >
-              <LogOut size={20} className="mr-2" />
-              로그아웃
-            </button>
+            {/* Login/Logout button (mobile) */}
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#5a8f96] transition-colors"
+              >
+                <LogOut size={20} className="mr-2" />
+                로그아웃
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="flex w-full items-center px-3 py-2 rounded-md text-base font-medium text-white hover:bg-[#5a8f96] transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <User size={20} className="mr-2" />
+                로그인
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -26,10 +26,19 @@ axiosInstance.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const message = error.response.data?.message;
+      const isGPTRequest = error.config.url.includes('/api/gpt/generate-routine');
+      const isPublicEndpoint = [
+        '/api/workout-logs/dates/',
+        '/api/workout-logs/',
+        '/api/users/'
+      ].some(endpoint => error.config.url.includes(endpoint));
 
+      // GPT 요청이나 공개 엔드포인트가 아닌 경우에만 로그인 페이지로 리다이렉트
       if (
-        message === "유효하지 않은 토큰입니다" ||
-        message === "인증 토큰이 없습니다"
+        !isGPTRequest && 
+        !isPublicEndpoint &&
+        (message === "유효하지 않은 토큰입니다" ||
+        message === "인증 토큰이 없습니다")
       ) {
         localStorage.removeItem("token");
 

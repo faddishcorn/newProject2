@@ -20,7 +20,7 @@ router.get("/followings", authMiddleware, getFollowings);
 router.get("/followers", authMiddleware, getFollowers);
 router.get("/requests/sent", authMiddleware, getSentRequests);
 router.get("/requests/received", authMiddleware, getReceivedRequests);
-router.get("/search", authMiddleware, searchUsers);
+router.get("/search", searchUsers); // 비회원도 검색 가능하도록 authMiddleware 제거
 
 router.post("/request", authMiddleware, sendFollowRequest);
 router.delete("/request/:id", authMiddleware, cancelFollowRequest);

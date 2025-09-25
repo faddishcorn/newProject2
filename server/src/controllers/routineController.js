@@ -57,14 +57,15 @@ const updateRoutine = async (req, res) => {
 
 const saveRoutineHistory = async (req, res) => {
   const userId = req.user.id;
-  const { title, exercises } = req.body;
+  const { title, exercises, date } = req.body;
 
-  const today = new Date(Date.now() + 9 * 60 * 60 * 1000) // UTC+9
-  .toISOString()
-  .split("T")[0];
+  // date가 제공되지 않은 경우 현재 날짜 사용
+  const targetDate = date || new Date(Date.now() + 9 * 60 * 60 * 1000) // UTC+9
+    .toISOString()
+    .split("T")[0];
 
   try {
-    let record = await DailyRoutine.findOne({ userId, date: today });
+    let record = await DailyRoutine.findOne({ userId, date: targetDate });
 
     const newRoutine = { title, exercises };
 
@@ -74,7 +75,7 @@ const saveRoutineHistory = async (req, res) => {
     } else {
       await DailyRoutine.create({
         userId,
-        date: today,
+        date: targetDate,
         routines: [newRoutine],
       });
     }

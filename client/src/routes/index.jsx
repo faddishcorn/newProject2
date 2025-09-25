@@ -21,9 +21,7 @@ export default function AppRoutes() {
 
         <Route
           element={
-            <PrivateRoute>
-              <MainLayout />
-            </PrivateRoute>
+              <MainLayout /> 
           }
         >
           <Route path="/main" element={<MainPage />} />

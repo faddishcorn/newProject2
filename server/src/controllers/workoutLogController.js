@@ -9,6 +9,18 @@ const mongoose = require("mongoose");
 const getWorkoutDates = async (req, res) => {
   try {
     const userId = req.params.userId;
+
+    // 사용자 정보 조회
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    }
+
+    // 비공개 계정이고 인증되지 않은 사용자인 경우 빈 배열 반환
+    if (user.isPrivate && (!req.user || !user.followers.includes(req.user.id))) {
+      return res.json([]);
+    }
+
     const routines = await Routine.find({ userId });
     const dates = routines.map((routine) => routine.date);
     res.json(dates);
@@ -24,8 +36,19 @@ const getWorkoutDates = async (req, res) => {
 const getWorkoutLogByDate = async (req, res) => {
   try {
     const { userId, date } = req.params;
-    const log = await Routine.findOne({ userId, date });
 
+    // 사용자 정보 조회
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+    }
+
+    // 비공개 계정이고 인증되지 않은 사용자인 경우 빈 배열 반환
+    if (user.isPrivate && (!req.user || !user.followers.includes(req.user.id))) {
+      return res.json([]);
+    }
+
+    const log = await Routine.findOne({ userId, date });
     if (!log) return res.json([]);
 
     res.json(log.routines);

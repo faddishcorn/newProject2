@@ -48,41 +48,66 @@ export default function WorkoutLogPage() {
 
   const commentInputRef = useRef(null);
 
+  const isAuthenticated = !!localStorage.getItem("token");
+
   useEffect(() => {
     const init = async () => {
       try {
         setIsLoading(true);
 
-        // ✅ 무조건 내 정보 가져오기
-        const resMe = await axiosInstance.get(`/api/auth/me`);
-        const meData = resMe.data;
-        setCurrentUserId(meData._id);
+        if (isAuthenticated) {
+          // 회원인 경우
+          const resMe = await axiosInstance.get(`/api/auth/me`);
+          const meData = resMe.data;
+          setCurrentUserId(meData._id);
 
-        if (userId) {
-          // ✅ 타인 프로필 조회
-          const resUser = await axiosInstance.get(`/api/users/${userId}`);
+          if (userId) {
+            // 타인 프로필 조회
+            const resUser = await axiosInstance.get(`/api/users/${userId}`);
+            const userData = resUser.data;
+            userData.id = userData._id;
+            setUser(userData);
+            setIsOwnProfile(false);
 
-          const userData = resUser.data;
-          userData.id = userData._id; // id 세팅
-          setUser(userData);
-          setIsOwnProfile(false);
+            const canAccess = userData.isFollowing || !userData.isPrivate;
+            setHasAccess(canAccess);
 
-          const canAccess = userData.isFollowing || !userData.isPrivate;
-          setHasAccess(canAccess);
+            if (canAccess) {
+              fetchDatesWithWorkouts(userId);
+              fetchComments(userId);
+            }
+          } else {
+            // 내 프로필
+            meData.id = meData._id;
+            setUser(meData);
+            setIsOwnProfile(true);
+            setHasAccess(true);
 
-          if (canAccess) {
-            fetchDatesWithWorkouts(userId);
-            fetchComments(userId);
+            fetchDatesWithWorkouts(meData._id);
+            fetchComments(meData._id);
           }
         } else {
-          // ✅ 내 프로필
-          meData.id = meData._id; // id 세팅
-          setUser(meData);
-          setIsOwnProfile(true);
-          setHasAccess(true);
+          // 비회원인 경우
+          if (userId) {
+            // 타인 프로필 조회
+            const resUser = await axiosInstance.get(`/api/users/${userId}`);
+            const userData = resUser.data;
+            userData.id = userData._id;
+            setUser(userData);
+            setIsOwnProfile(false);
+            setHasAccess(!userData.isPrivate); // 비공개가 아닌 경우에만 접근 가능
 
-          fetchDatesWithWorkouts(meData._id);
-          fetchComments(meData._id);
+            if (!userData.isPrivate) {
+              fetchDatesWithWorkouts(userId);
+              fetchComments(userId);
+            }
+          } else {
+            // 비회원 자신의 로컬 기록
+            setUser({ username: "비회원" });
+            setIsOwnProfile(true);
+            setHasAccess(true);
+            fetchLocalWorkoutLogs();
+          }
         }
 
         setIsLoading(false);
@@ -93,20 +118,51 @@ export default function WorkoutLogPage() {
     };
 
     init();
-  }, [userId]);
+  }, [userId, isAuthenticated]);
 
   useEffect(() => {
     const fetchRoutinesOnDateChange = async () => {
       try {
         if (!user) return; // 아직 유저 정보 없으면 패스
-        const formattedDate = formatDate(selectedDate);
-        const targetId = userId || user._id;
 
-        const res = await axiosInstance.get(
-          `/api/workout-logs/${targetId}/${formattedDate}`,
-        );
+        if (!userId && !isAuthenticated) {
+          // 비회원 자신의 로컬 기록
+          const logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+          
+          // 날짜 처리를 위한 함수
+          const getLocalDate = (dateStr) => {
+            const date = new Date(dateStr);
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          };
 
-        setDailyRoutines(res.data);
+          const formattedDate = formatDate(selectedDate);
+          const dayLogs = logs.filter(log => {
+            const logDate = getLocalDate(log.date);
+            return formatDate(logDate) === formattedDate;
+          });
+          
+          if (dayLogs.length > 0) {
+            const routines = dayLogs.map(log => ({
+              id: log.id,
+              title: log.title,
+              exercises: log.exercises.map(exercise => ({
+                ...exercise,
+                isCompleted: true
+              }))
+            }));
+            setDailyRoutines(routines);
+          } else {
+            setDailyRoutines([]);
+          }
+        } else {
+          // 회원 또는 타인의 기록
+          const formattedDate = formatDate(selectedDate);
+          const targetId = userId || user._id;
+          const res = await axiosInstance.get(
+            `/api/workout-logs/${targetId}/${formattedDate}`,
+          );
+          setDailyRoutines(res.data);
+        }
       } catch (error) {
         console.error("선택 날짜 운동 기록 조회 실패", error);
         toast.error("운동 기록 조회 실패, 다시 시도해주세요😥");
@@ -114,19 +170,68 @@ export default function WorkoutLogPage() {
       }
     };
 
-    if (hasAccess && user && user._id) {
+    if (hasAccess && user) {
       fetchRoutinesOnDateChange();
     }
-  }, [selectedDate, user, hasAccess]);
+  }, [selectedDate, user, hasAccess, userId, isAuthenticated]);
 
-  const fetchDatesWithWorkouts = async (targetId) => {
+  // 로컬 스토리지에서 운동 기록 가져오기
+  const fetchLocalWorkoutLogs = (date = selectedDate) => {
     try {
-      const res = await axiosInstance.get(
-        `/api/workout-logs/dates/${targetId}`,
-      );
-      setDatesWithWorkouts(res.data);
-    } catch (error) {
-      console.error("운동 날짜 조회 실패", error);
+      const logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+      
+      // 날짜 처리를 위한 함수
+      const getLocalDate = (dateStr) => {
+        const date = new Date(dateStr);
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      };
+
+      // 시간대를 제거한 날짜만으로 비교하기 위해 dates 배열 생성
+      const dates = logs.map(log => formatDate(getLocalDate(log.date)));
+      setDatesWithWorkouts(dates);
+
+      // 선택된 날짜의 운동 기록 가져오기
+      const formattedDate = formatDate(date);
+      const dayLogs = logs.filter(log => {
+        const logDate = getLocalDate(log.date);
+        return formatDate(logDate) === formattedDate;
+      });
+      
+      if (dayLogs.length > 0) {
+        // 각 로그를 하나의 루틴으로 변환
+        setDailyRoutines(dayLogs.map(log => ({
+          id: log.id,
+          title: log.title,
+          exercises: log.exercises.map(exercise => ({
+            ...exercise,
+            isCompleted: true // 저장된 운동은 모두 완료된 것으로 표시
+          }))
+        })));
+      } else {
+        setDailyRoutines([]);
+      }
+    } catch (err) {
+      console.error("로컬 운동 기록 불러오기 실패:", err);
+      toast.error("로컬 운동 기록을 불러오는데 실패했습니다.");
+      setDailyRoutines([]);
+    }
+  };
+
+  const fetchDatesWithWorkouts = async (targetUserId) => {
+    try {
+      if (!userId && !isAuthenticated) {
+        // 비회원 자신의 기록
+        fetchLocalWorkoutLogs();
+      } else {
+        // 회원 또는 타인의 기록
+        const res = await axiosInstance.get(
+          `/api/workout-logs/dates/${targetUserId}`,
+        );
+        setDatesWithWorkouts(res.data);
+      }
+    } catch (err) {
+      console.error("운동 날짜 목록 불러오기 실패:", err);
+      toast.error("운동 기록 불러오기 실패, 다시 시도해주세요😥");
     }
   };
 
@@ -134,11 +239,33 @@ export default function WorkoutLogPage() {
   const fetchDailyRoutines = async (date, targetId) => {
     try {
       setIsWorkoutLogLoading(true);
-      const formattedDate = formatDate(date);
-      const res = await axiosInstance.get(
-        `/api/workout-logs/${targetId}/${formattedDate}`,
-      );
-      setDailyRoutines(res.data);
+      if (!userId && !isAuthenticated) {
+        // 비회원 자신의 로컬 기록
+        const logs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+        const formattedDate = formatDate(date);
+        const dayLogs = logs.filter(log => formatDate(new Date(log.date)) === formattedDate);
+        
+        if (dayLogs.length > 0) {
+          const routines = dayLogs.map(log => ({
+            id: log.id,
+            title: log.title,
+            exercises: log.exercises.map(exercise => ({
+              ...exercise,
+              isCompleted: true
+            }))
+          }));
+          setDailyRoutines(routines);
+        } else {
+          setDailyRoutines([]);
+        }
+      } else {
+        // 회원 또는 타인의 기록
+        const formattedDate = formatDate(date);
+        const res = await axiosInstance.get(
+          `/api/workout-logs/${targetId}/${formattedDate}`,
+        );
+        setDailyRoutines(res.data);
+      }
     } catch (error) {
       console.error("운동 기록 조회 실패", error);
       setDailyRoutines([]);
@@ -166,7 +293,8 @@ export default function WorkoutLogPage() {
   const handleDateSelect = (date) => {
     setSelectedDate(date);
     if (hasAccess) {
-      fetchDailyRoutines(date, user.id);
+      const targetId = userId || user._id;
+      fetchDailyRoutines(date, targetId);
     }
   };
 
@@ -543,7 +671,7 @@ export default function WorkoutLogPage() {
       );
     }
 
-    if (dailyRoutines.length === 0) {
+    if (!dailyRoutines || dailyRoutines.length === 0) {
       return (
         <div className="bg-white rounded-lg shadow-sm p-6 flex flex-col items-center justify-center h-full">
           <Calendar className="h-12 w-12 text-gray-300 mb-2" />
@@ -712,27 +840,39 @@ export default function WorkoutLogPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmitComment} className="flex space-x-2">
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="댓글을 입력하세요..."
-            className="min-w-0 flex-1 px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
-            disabled={isSubmittingComment}
-          />
-          <button
-            type="submit"
-            disabled={!newComment.trim() || isSubmittingComment}
-            className="px-4 py-2 rounded-md bg-[#6ca7af] text-white font-medium hover:bg-[#5a8f96] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            {isSubmittingComment ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-1"></div>
-            ) : (
-              <Send className="h-4 w-4 mr-1" />
-            )}
-          </button>
-        </form>
+        {isAuthenticated ? (
+          <form onSubmit={handleSubmitComment} className="flex space-x-2">
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요..."
+              className="min-w-0 flex-1 px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+              disabled={isSubmittingComment}
+            />
+            <button
+              type="submit"
+              disabled={!newComment.trim() || isSubmittingComment}
+              className="px-4 py-2 rounded-md bg-[#6ca7af] text-white font-medium hover:bg-[#5a8f96] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {isSubmittingComment ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-1"></div>
+              ) : (
+                <Send className="h-4 w-4 mr-1" />
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+            <span className="text-gray-500">로그인하여 댓글을 남겨보세요</span>
+            <a
+              href="/login"
+              className="text-[#6ca7af] hover:text-[#5a8f96] font-medium hover:underline"
+            >
+              로그인
+            </a>
+          </div>
+        )}
       </div>
     );
   };

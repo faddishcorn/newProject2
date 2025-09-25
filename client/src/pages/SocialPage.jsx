@@ -29,9 +29,15 @@ export default function SocialPage() {
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
+  const isAuthenticated = !!localStorage.getItem("token");
+
   useEffect(() => {
-    fetchAll();
-  }, []);
+    if (isAuthenticated) {
+      fetchAll();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated]);
 
   const fetchAll = async () => {
     try {
@@ -127,9 +133,17 @@ export default function SocialPage() {
     e.preventDefault();
     setIsSearching(true);
     try {
-      const res = await axiosInstance.get(
-        `${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`,
-      );
+      let res;
+      if (isAuthenticated) {
+        res = await axiosInstance.get(
+          `${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`,
+        );
+      } else {
+        // 비회원인 경우 토큰 없이 직접 요청
+        res = await axios.get(
+          `${import.meta.env.VITE_API_BASE}/api/social/search?q=${searchQuery}`,
+        );
+      }
       setSearchResults(res.data);
       setHasSearched(true);
     } catch (err) {
@@ -181,6 +195,10 @@ export default function SocialPage() {
 
   // 팔로우 버튼 렌더링
   const renderFollowButton = (user) => {
+    if (!isAuthenticated) {
+      return null; // 비회원인 경우 버튼을 표시하지 않음
+    }
+
     const userId = user.id || user._id; // ✅ 여기서 id 정리
     if (user.status === "following") {
       return (
@@ -259,7 +277,7 @@ export default function SocialPage() {
             }`}
             onClick={() => setActiveTab("following")}
           >
-            팔로잉
+            팔로잉 {!isAuthenticated && <span className="text-xs">(로그인 필요)</span>}
           </button>
           <button
             className={`flex-1 py-3 text-center font-medium transition-colors ${
@@ -269,7 +287,7 @@ export default function SocialPage() {
             }`}
             onClick={() => setActiveTab("followers")}
           >
-            팔로워
+            팔로워 {!isAuthenticated && <span className="text-xs">(로그인 필요)</span>}
           </button>
           <button
             className={`flex-1 py-3 text-center font-medium transition-colors ${
@@ -292,7 +310,12 @@ export default function SocialPage() {
                 팔로잉
               </h2>
 
-              {followings.length > 0 ? (
+              {!isAuthenticated ? (
+                <div className="text-center py-16 text-gray-500 bg-gray-50 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-2">로그인이 필요한 기능입니다</h3>
+                  <p>로그인하고 다른 사용자들과 함께 운동해보세요!</p>
+                </div>
+              ) : followings.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {followings.map((user) => (
                     <div
@@ -398,7 +421,12 @@ export default function SocialPage() {
                 팔로워
               </h2>
 
-              {followers.length > 0 ? (
+              {!isAuthenticated ? (
+                <div className="text-center py-16 bg-gray-50 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-2">로그인이 필요한 기능입니다</h3>
+                  <p className="text-gray-600">로그인하고 다른 사용자들과 함께 운동해보세요!</p>
+                </div>
+              ) : followers.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {followers.map((user) => {
                     // status 계산
@@ -581,7 +609,7 @@ export default function SocialPage() {
                             <ExternalLink size={16} className="mr-1.5" />
                             방문
                           </button>
-                          {renderFollowButton(user)}
+                          {isAuthenticated && renderFollowButton(user)}
                         </div>
                       </div>
                     ))}

@@ -1,24 +1,47 @@
 const axios = require("axios");
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 const generateRoutine = async (req, res) => {
   const { prompt } = req.body;
 
   try {
-    const userId = req.user.id;
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "유저를 찾을 수 없습니다." });
+    // 사용자 정보 초기화
+    let userInfo = {
+      height: "알 수 없음",
+      weight: "알 수 없음",
+      gender: "알 수 없음",
+      birthdate: "알 수 없음"
+    };
+
+    // 인증된 사용자인 경우 사용자 정보 가져오기
+    if (req.headers.authorization) {
+      try {
+        const token = req.headers.authorization.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        if (user) {
+          userInfo = {
+            height: user.height || "알 수 없음",
+            weight: user.weight || "알 수 없음",
+            gender: user.gender || "알 수 없음",
+            birthdate: user.birthdate ? user.birthdate.toISOString().split("T")[0] : "알 수 없음"
+          };
+        }
+      } catch (err) {
+        // 토큰 검증 실패 시 기본 정보로 진행
+        console.log("토큰 검증 실패, 기본 정보로 진행");
+      }
     }
 
     const systemPrompt = `
 당신은 사용자에게 운동 루틴을 추천하는 트레이너입니다.
 
 사용자의 신체 정보:
-- 키: ${user.height || "알 수 없음"}cm
-- 몸무게: ${user.weight || "알 수 없음"}kg
-- 성별: ${user.gender || "알 수 없음"}
-- 생년월일: ${user.birthdate ? user.birthdate.toISOString().split("T")[0] : "알 수 없음"}
+- 키: ${userInfo.height}cm
+- 몸무게: ${userInfo.weight}kg
+- 성별: ${userInfo.gender}
+- 생년월일: ${userInfo.birthdate}
 
 사용자의 요청: ${prompt}
 

@@ -5,7 +5,7 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 const workoutLogController = require("../controllers/workoutLogController");
 
-// ✅ 운동 기록 날짜 목록 가져오기
+// ✅ 운동 기록 날짜 목록 가져오기 (비회원도 접근 가능)
 router.get("/dates/:userId", workoutLogController.getWorkoutDates);
 
 // ✅ 운동 기록 댓글 가져오기

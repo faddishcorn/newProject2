@@ -88,7 +88,7 @@ export default function LandingPage() {
               </p>
               <button
                 className="cta-button"
-                onClick={() => navigate("/signup")}
+                onClick={() => navigate("/main")}
               >
                 무료로 시작하기 <ArrowRight size={16} />
               </button>
@@ -211,7 +211,7 @@ export default function LandingPage() {
           <div className="cta-content">
             <h2>지금 바로 시작하세요</h2>
             <p>완전 무료로 제공되는 바디플랜의 모든 기능을 경험해보세요</p>
-            <button className="cta-button" onClick={() => navigate("/signup")}>
+            <button className="cta-button" onClick={() => navigate("/main")}>
               무료로 시작하기 <ArrowRight size={16} />
             </button>
           </div>

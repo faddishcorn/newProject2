@@ -61,29 +61,39 @@ const searchUsers = async (req, res) => {
     if (!keyword) return res.json([]);
 
     // 검색 대상 유저들
-    const users = await User.find({
-      username: { $regex: keyword, $options: "i" },
-      _id: { $ne: req.user.id },
-    }).select("username avatar gender");
+    const query = {
+      username: { $regex: keyword, $options: "i" }
+    };
 
-    // 현재 로그인한 유저 정보 가져오기
-    const me = await User.findById(req.user.id);
+    // 로그인한 경우에만 자신을 제외
+    if (req.user) {
+      query._id = { $ne: req.user.id };
+    }
+
+    const users = await User.find(query).select("username avatar gender");
 
     // 결과 가공
     const response = users.map((target) => {
-      let status = "none";
-      if (me.following.includes(target._id)) {
-        status = "following";
-      } else if (me.sentRequests.includes(target._id)) {
-        status = "requested";
-      }
-      return {
-        id: target._id, // id 필드로 맞춰주자
+      // 기본 응답 객체
+      const userObj = {
+        id: target._id,
         username: target.username,
         avatar: target.avatar,
         gender: target.gender,
-        status, // 추가
+        status: "none"
       };
+
+      // 로그인한 경우에만 팔로우 상태 추가
+      if (req.user) {
+        const me = req.user;
+        if (me.following && me.following.includes(target._id)) {
+          userObj.status = "following";
+        } else if (me.sentRequests && me.sentRequests.includes(target._id)) {
+          userObj.status = "requested";
+        }
+      }
+
+      return userObj;
     });
 
     res.json(response);

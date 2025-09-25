@@ -21,6 +21,7 @@ import axiosInstance from "../api/axiosInstance";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
+  const [isAuthenticated] = useState(!!localStorage.getItem("token"));
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -48,6 +49,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      if (!isAuthenticated) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         setIsLoading(true);
         const res = await axiosInstance.get(`/api/users/profile`);
@@ -81,7 +87,7 @@ export default function ProfilePage() {
       }
     };
     fetchUserData();
-  }, []);
+  }, [isAuthenticated]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -210,6 +216,29 @@ export default function ProfilePage() {
         <div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-[#6ca7af] rounded-full"></div>
       </div>
     );
+
+  // 비회원용 UI
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 p-6">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold text-gray-800">프로필 설정</h1>
+          <p className="text-xl text-gray-600">
+            로그인하여 더욱 맞춤화된 루틴을 만들어보세요!
+          </p>
+          <div className="flex flex-col items-center mt-8">
+            <DefaultAvatar username="게스트" size="xl" className="w-32 h-32 mb-6" />
+            <button
+              onClick={() => window.location.href = '/login'}
+              className="px-6 py-3 bg-[#6ca7af] hover:bg-[#5a8f96] text-white rounded-lg transition-colors font-semibold text-lg"
+            >
+              로그인하기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

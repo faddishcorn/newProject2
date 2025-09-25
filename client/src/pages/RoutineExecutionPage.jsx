@@ -6,11 +6,13 @@ import { CheckCircle, ArrowLeft, Trophy } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import axiosInstance from "../api/axiosInstance";
+import { saveWorkoutLog } from "../utils/workoutLogUtils";
 
 export default function RoutineExecutionPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { routineId } = useParams();
+  const [isAuthenticated] = useState(!!localStorage.getItem("token"));
 
   const [routine, setRoutine] = useState(
     location.state?.routine || {
@@ -48,16 +50,29 @@ export default function RoutineExecutionPage() {
 
   const handleCompleteRoutine = async () => {
     try {
-      await axiosInstance.post("/api/routines/history", {
-        title: routine.title,
-        exercises: routine.exercises,
-      });
+      if (isAuthenticated) {
+        // 회원인 경우 서버에 저장
+        await axiosInstance.post("/api/routines/history", {
+          title: routine.title,
+          exercises: routine.exercises,
+        });
+      } else {
+        // 비회원인 경우 로컬 스토리지에 저장
+        saveWorkoutLog({
+          title: routine.title,
+          exercises: routine.exercises,
+        });
+      }
 
       navigate("/main", {
         state: {
           routineCompleted: true,
           routineTitle: routine.title,
         },
+      });
+      
+      toast.success("운동 기록이 저장되었습니다!", {
+        position: "top-center",
       });
     } catch (err) {
       console.error("루틴 기록 저장 실패:", err);
@@ -162,8 +177,8 @@ export default function RoutineExecutionPage() {
               : "bg-[#6ca7af] hover:bg-[#5a8f96]"
           }`}
         >
-          {allCompleted && <Trophy size={18} className="mr-2" />} 오늘의 루틴
-          완료!
+          {allCompleted && <Trophy size={18} className="mr-2" />}
+          {isAuthenticated ? "오늘의 루틴 완료!" : "운동 기록 저장하기"}
         </button>
         <button
           onClick={handleCancel}
@@ -171,6 +186,15 @@ export default function RoutineExecutionPage() {
         >
           취소
         </button>
+        {!isAuthenticated && (
+          <p className="text-center text-sm text-gray-500">
+            * 비회원으로 저장된 운동 기록은 이 브라우저에만 저장됩니다.{" "}
+            <a href="/login" className="text-[#6ca7af] hover:underline">
+              로그인
+            </a>
+            하여 기록을 동기화할 수 있습니다.
+          </p>
+        )}
       </div>
     </div>
   );

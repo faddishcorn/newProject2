@@ -15,6 +15,12 @@ import axios from "axios";
 import RoutineEditor from "../components/RoutineEditor";
 import { toast } from "react-toastify";
 import axiosInstance from "../api/axiosInstance";
+import { 
+  getLocalRoutines, 
+  saveLocalRoutine, 
+  updateLocalRoutine, 
+  deleteLocalRoutine 
+} from "../utils/localStorageUtils";
 
 export default function RoutinesPage() {
   const [promptInput, setPromptInput] = useState("");
@@ -41,11 +47,20 @@ export default function RoutinesPage() {
     }
   }, [promptInput]);
 
+  const isAuthenticated = !!localStorage.getItem("token");
+
   useEffect(() => {
     const fetchSavedRoutines = async () => {
       try {
-        const res = await axiosInstance.get(`/api/routines`);
-        setSavedRoutines(res.data);
+        if (isAuthenticated) {
+          // 회원인 경우 서버에서 루틴 가져오기
+          const res = await axiosInstance.get(`/api/routines`);
+          setSavedRoutines(res.data);
+        } else {
+          // 비회원인 경우 로컬 스토리지에서 루틴 가져오기
+          const localRoutines = getLocalRoutines();
+          setSavedRoutines(localRoutines);
+        }
       } catch (err) {
         console.error("루틴 목록 불러오기 실패:", err);
         toast.error("루틴 목록 불러오기 실패, 다시 시도해주세요😥");
@@ -53,7 +68,7 @@ export default function RoutinesPage() {
     };
 
     fetchSavedRoutines();
-  }, []);
+  }, [isAuthenticated]);
 
   const handlePromptSubmit = async (e) => {
     e.preventDefault();
@@ -63,9 +78,18 @@ export default function RoutinesPage() {
     setError(null); // 이전 에러 초기화
 
     try {
-      const res = await axiosInstance.post(`/api/gpt/generate-routine`, {
-        prompt: promptInput,
-      });
+      let res;
+      if (isAuthenticated) {
+        // 회원인 경우 토큰과 함께 요청
+        res = await axiosInstance.post(`/api/gpt/generate-routine`, {
+          prompt: promptInput,
+        });
+      } else {
+        // 비회원인 경우 토큰 없이 요청
+        res = await axios.post(`${import.meta.env.VITE_API_BASE}/api/gpt/generate-routine`, {
+          prompt: promptInput,
+        });
+      }
 
       if (!res.data || !Array.isArray(res.data)) {
         throw new Error("루틴 형식이 잘못되었습니다.");
@@ -111,8 +135,9 @@ export default function RoutinesPage() {
     setIsCreatingNewRoutine(true);
   };
 
-  const handleEditRoutine = (routineId) => {
-    const target = savedRoutines.find((r) => r._id === routineId);
+    const handleEditRoutine = (routineId) => {
+    // 회원/비회원 상태에 따라 다른 ID 필드 사용
+    const target = savedRoutines.find((r) => r._id === routineId || r.id === routineId);
     if (target) {
       const clonedExercises = target.exercises.map((ex, idx) => ({
         id: ex._id || ex.id || idx,
@@ -124,19 +149,44 @@ export default function RoutinesPage() {
 
   const handleUpdateRoutine = async (routine) => {
     try {
-      const res = await axiosInstance.put(`/api/routines/${routine._id}`, {
-        title: routine.title,
-        exercises: routine.exercises.map(({ name, sets, reps }) => ({
-          name,
-          sets,
-          reps,
-        })),
-      });
+      if (isAuthenticated) {
+        // 회원인 경우 서버에서 수정
+        const res = await axiosInstance.put(`/api/routines/${routine._id}`, {
+          title: routine.title,
+          exercises: routine.exercises.map(({ name, sets, reps }) => ({
+            name,
+            sets,
+            reps,
+          })),
+        });
 
-      const updated = savedRoutines.map((r) =>
-        r._id === res.data._id ? res.data : r,
-      );
-      setSavedRoutines(updated);
+        const updated = savedRoutines.map((r) =>
+          r._id === res.data._id ? res.data : r,
+        );
+        setSavedRoutines(updated);
+      } else {
+        // 비회원인 경우 로컬 스토리지에서 수정
+        const routines = JSON.parse(localStorage.getItem('routines') || '[]');
+        const routineId = routine._id || routine.id;
+        const routineIndex = routines.findIndex(r => r.id === routineId || r._id === routineId);
+        
+        if (routineIndex !== -1) {
+          // 기존 루틴의 ID를 유지하면서 내용 업데이트
+          routines[routineIndex] = {
+            ...routines[routineIndex],
+            title: routine.title,
+            exercises: routine.exercises.map(({ name, sets, reps }) => ({
+              name,
+              sets,
+              reps,
+            })),
+          };
+          
+          localStorage.setItem('routines', JSON.stringify(routines));
+          setSavedRoutines(routines);
+        }
+      }
+
       setEditingRoutine(null);
       setGeneratedRoutine(null);
       setIsCreatingNewRoutine(false);
@@ -149,10 +199,20 @@ export default function RoutinesPage() {
 
   const handleDeleteRoutine = async (routineId) => {
     try {
-      await axiosInstance.delete(`/api/routines/${routineId}`);
-      setSavedRoutines(
-        savedRoutines.filter((routine) => routine._id !== routineId),
-      );
+      if (isAuthenticated) {
+        // 회원인 경우 서버에서 삭제
+        await axiosInstance.delete(`/api/routines/${routineId}`);
+        setSavedRoutines(
+          savedRoutines.filter((routine) => routine._id !== routineId),
+        );
+      } else {
+        // 비회원인 경우 로컬 스토리지에서 삭제
+        deleteLocalRoutine(routineId);
+        setSavedRoutines(
+          savedRoutines.filter((routine) => (routine._id || routine.id) !== routineId),
+        );
+      }
+      toast.success("루틴이 삭제되었습니다.");
     } catch (err) {
       console.error("루틴 삭제 실패:", err);
       toast.error("루틴 삭제 실패, 다시 시도해주세요😥");
@@ -161,7 +221,7 @@ export default function RoutinesPage() {
 
   // 저장 핸들러 라우팅
   const handleSaveRoutine = (routine) => {
-    if (routine._id) {
+    if (routine._id || routine.id) {
       handleUpdateRoutine(routine);
     } else {
       handleCreateRoutine(routine);
@@ -171,16 +231,30 @@ export default function RoutinesPage() {
   // 루틴 저장 (새 루틴용)
   const handleCreateRoutine = async (routine) => {
     try {
-      const res = await axiosInstance.post(`/api/routines`, {
-        title: routine.title,
-        exercises: routine.exercises.map(({ name, sets, reps }) => ({
-          name,
-          sets,
-          reps,
-        })),
-      });
+      if (isAuthenticated) {
+        // 회원인 경우 서버에 저장
+        const res = await axiosInstance.post(`/api/routines`, {
+          title: routine.title,
+          exercises: routine.exercises.map(({ name, sets, reps }) => ({
+            name,
+            sets,
+            reps,
+          })),
+        });
+        setSavedRoutines([res.data, ...savedRoutines]);
+      } else {
+        // 비회원인 경우 로컬 스토리지에 저장
+        const newRoutine = saveLocalRoutine({
+          title: routine.title,
+          exercises: routine.exercises.map(({ name, sets, reps }) => ({
+            name,
+            sets,
+            reps,
+          })),
+        });
+        setSavedRoutines([newRoutine, ...savedRoutines]);
+      }
 
-      setSavedRoutines([res.data, ...savedRoutines]);
       setGeneratedRoutine(null);
       setNewRoutine(null);
       setIsCreatingNewRoutine(false);
@@ -476,7 +550,7 @@ export default function RoutinesPage() {
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold text-gray-800">{routine.title}</h3>
                 <button
-                  onClick={() => setRoutineToDelete(routine._id)} // 클릭 시 루틴 ID만 저장
+                  onClick={() => setRoutineToDelete(routine._id || routine.id)} // 회원/비회원 상태에 따라 다른 ID 사용
                   className="p-1 rounded-full hover:bg-gray-100 text-red-500"
                   title="루틴 삭제"
                 >

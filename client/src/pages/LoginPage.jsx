@@ -34,8 +34,57 @@ export default function LoginPage() {
       const { token } = res.data;
       localStorage.setItem("token", token);
 
-      // 3. 이동
-      navigate("/main");
+      // 로컬 스토리지의 루틴을 서버로 동기화
+      const localRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
+      if (localRoutines.length > 0) {
+        try {
+          setMessage("로컬 운동 루틴을 동기화하는 중...");
+          // 각 로컬 루틴을 서버에 저장
+          await Promise.all(localRoutines.map(routine => 
+            axiosInstance.post('/api/routines', {
+              title: routine.title,
+              exercises: routine.exercises.map(({ name, sets, reps }) => ({
+                name,
+                sets,
+                reps,
+              })),
+            })
+          ));
+          // 동기화 후 로컬 루틴 삭제
+          localStorage.removeItem('routines');
+          setMessage("로컬 운동 루틴 동기화 완료!");
+        } catch (error) {
+          console.error('로컬 루틴 동기화 실패:', error);
+          // 동기화 실패해도 로그인은 진행
+        }
+      }
+
+      // 로컬 스토리지의 운동 기록을 서버로 동기화
+      const localWorkoutLogs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+      if (localWorkoutLogs.length > 0) {
+        try {
+          setMessage("로컬 운동 기록을 동기화하는 중...");
+          // 각 운동 기록을 서버에 저장
+          await Promise.all(localWorkoutLogs.map(log => 
+            axiosInstance.post('/api/routines/history', {
+              title: log.title,
+              exercises: log.exercises,
+              date: log.date // 날짜 정보도 함께 전송
+            })
+          ));
+          // 동기화 후 로컬 운동 기록 삭제
+          localStorage.removeItem('workoutLogs');
+          setMessage("로컬 운동 기록 동기화 완료!");
+        } catch (error) {
+          console.error('로컬 운동 기록 동기화 실패:', error);
+          // 동기화 실패해도 로그인은 진행
+        }
+      }
+
+      // 3. 이동 (약간 지연시켜서 메시지를 보여줌)
+      setTimeout(() => {
+        navigate("/main");
+      }, 1000);
     } catch (err) {
       console.error("로그인 실패:", err);
       const errorMessage =
@@ -125,9 +174,15 @@ export default function LoginPage() {
               )}
             </Button>
 
-            {/* 에러 메시지 */}
+            {/* 상태 메시지 */}
             {message && (
-              <p className="text-red-500 text-sm text-center">{message}</p>
+              <div className={`mt-4 rounded-lg border p-4 text-sm ${
+                message.includes('실패') 
+                  ? 'border-red-500 bg-red-50 text-red-600'
+                  : 'border-blue-500 bg-blue-50 text-blue-600'
+              }`}>
+                {message}
+              </div>
             )}
           </form>
 

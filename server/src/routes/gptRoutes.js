@@ -3,7 +3,7 @@ const router = express.Router();
 const { generateRoutine } = require("../controllers/gptController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/generate-routine", authMiddleware, generateRoutine);
+router.post("/generate-routine", generateRoutine);
 router.get("/test", (req, res) => {
   res.send("라우터 연결 OK");
 });

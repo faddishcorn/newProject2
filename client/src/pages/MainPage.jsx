@@ -6,12 +6,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import axiosInstance from "../api/axiosInstance";
+import { getLocalRoutines } from "../utils/localStorageUtils";
 
 export default function MainPage() {
   const [greeting, setGreeting] = useState("");
-  const [userName, setUserName] = useState("");
+  const [userName, setUserName] = useState("운동하는 친구");
   const [userId, setUserId] = useState("");
   const [thisWeekWorkoutDays, setThisWeekWorkoutDays] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
   const [recommendedRoutines, setRecommendedRoutines] = useState([]);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [completedRoutineTitle, setCompletedRoutineTitle] = useState("");
@@ -40,22 +42,47 @@ export default function MainPage() {
   // 사용자 이름 가져오기
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const res = await axiosInstance.get(`/api/auth/me`);
-        setUserName(res.data.username);
-        setUserId(res.data._id);
-      } catch (err) {
-        console.error("사용자 정보 불러오기 실패", err);
-        toast.error("사용자 정보 불러오기 실패, 다시 시도해주세요😥");
+      if (isAuthenticated) {
+        try {
+          const res = await axiosInstance.get(`/api/auth/me`);
+          setUserName(res.data.username);
+          setUserId(res.data._id);
+        } catch (err) {
+          console.error("사용자 정보 불러오기 실패", err);
+          toast.error("사용자 정보 불러오기 실패, 다시 시도해주세요😥");
+        }
       }
     };
     fetchUser();
-  }, []);
+  }, [isAuthenticated]);
 
   // 이번 주 운동 기록 가져오기
   useEffect(() => {
     const fetchWorkoutDates = async () => {
-      if (!userId) return; // 아직 userId를 못 불러왔으면 대기
+      if (!isAuthenticated) {
+        // 비회원인 경우 로컬 스토리지에서 운동 기록 확인
+        const localWorkoutLogs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
+        
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay()); // 일요일
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(today);
+        endOfWeek.setDate(today.getDate() + (6 - today.getDay())); // 토요일
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        const uniqueWorkoutDays = new Set(
+          localWorkoutLogs
+            .map(log => new Date(log.date))
+            .filter((date) => date >= startOfWeek && date <= endOfWeek)
+            .map((date) => date.toDateString())
+        );
+
+        setThisWeekWorkoutDays(uniqueWorkoutDays.size);
+        return;
+      }
+
+      if (!userId) return; // 회원이지만 아직 userId를 못 불러왔으면 대기
 
       try {
         const res = await axiosInstance.get(
@@ -85,23 +112,31 @@ export default function MainPage() {
     };
 
     fetchWorkoutDates();
-  }, [userId]);
+  }, [userId, isAuthenticated]);
 
-  // 루틴 추천 목록 가져오기
+  // 루틴 목록 가져오기
   useEffect(() => {
-    const fetchRecommendedRoutines = async () => {
+    const fetchRoutines = async () => {
       try {
-        const res = await axiosInstance.get(`/api/routines`);
-        setRecommendedRoutines(res.data);
+        if (isAuthenticated) {
+          // 회원인 경우 서버에서 루틴 가져오기
+          const res = await axiosInstance.get(`/api/routines`);
+          setRecommendedRoutines(res.data);
+        } else {
+          // 비회원인 경우 로컬 스토리지에서 루틴 가져오기
+          const localRoutines = getLocalRoutines();
+          setRecommendedRoutines(localRoutines);
+        }
       } catch (err) {
         console.error("루틴 목록 불러오기 실패", err);
+        toast.error("루틴 목록을 불러오는데 실패했습니다.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchRecommendedRoutines();
-  }, []);
+    fetchRoutines();
+  }, [isAuthenticated]);
 
   // 루틴 완료 메시지 표시
   useEffect(() => {
@@ -128,15 +163,6 @@ export default function MainPage() {
       </div>
     );
   }
-
-  // if (errorMessage) {
-  //   return (
-  //     <div className="flex flex-col justify-center items-center h-screen space-y-4">
-  //       <p className="text-black-500 text-lg font-semibold">{errorMessage}</p>
-  //       <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[#6ca7af] text-white rounded-md">다시 시도</button>
-  //     </div>
-  //   )
-  // }
 
   return (
     <div className="space-y-8">
