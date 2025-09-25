@@ -100,7 +100,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
       {/* 로고 */}
       <div className="absolute top-4 left-4 md:top-8 md:left-8">
-        <a href="/" className="flex items-center space-x-2">
+        <a href="/main" className="flex items-center space-x-2">
           <img src={logo} alt="로고" className="h-17 w-20" />
         </a>
       </div>
@@ -202,7 +202,7 @@ export default function LoginPage() {
       {/* 홈으로 돌아가기 */}
       <div className="mt-8 text-center text-sm text-muted-foreground">
         <a
-          href="/"
+          href="/main"
           className="hover:text-foreground underline underline-offset-4"
         >
           홈으로 돌아가기
