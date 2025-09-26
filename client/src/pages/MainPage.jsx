@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Activity, TrendingUp, ArrowRight, Plus } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Activity, TrendingUp, ArrowRight, Plus, Send } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -18,10 +18,16 @@ export default function MainPage() {
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [completedRoutineTitle, setCompletedRoutineTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  // const [errorMessage, setErrorMessage] = useState("")
-
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedCommentText, setEditedCommentText] = useState("");
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  
   const location = useLocation();
   const navigate = useNavigate();
+  const commentInputRef = useRef(null);
 
   // 오늘 날짜
   const today = new Date();
@@ -155,6 +161,98 @@ export default function MainPage() {
     });
   };
 
+  // 댓글 관련 함수들
+  const fetchComments = async () => {
+    if (!isAuthenticated || !userId) return;
+    
+    try {
+      setIsLoadingComments(true);
+      const res = await axiosInstance.get(`/api/workout-logs/${userId}/comments`);
+      setComments(res.data);
+    } catch (error) {
+      console.error("댓글 조회 실패", error);
+    } finally {
+      setIsLoadingComments(false);
+    }
+  };
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    try {
+      setIsSubmittingComment(true);
+      const res = await axiosInstance.post(`/api/workout-logs/${userId}/comments`, {
+        content: newComment,
+      });
+      setComments([...comments, res.data]);
+      setNewComment("");
+    } catch (error) {
+      console.error("댓글 작성 실패", error);
+      toast.error("댓글 작성에 실패했습니다.");
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditedCommentText(comment.content);
+    setTimeout(() => {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCommentId(null);
+    setEditedCommentText("");
+  };
+
+  const handleSaveEdit = async (commentId) => {
+    if (!editedCommentText.trim()) return;
+    try {
+      setIsSubmittingComment(true);
+      await axiosInstance.put(`/api/workout-logs/comments/${commentId}`, {
+        content: editedCommentText,
+      });
+
+      const updated = comments.map((comment) =>
+        comment.id === commentId
+          ? { ...comment, content: editedCommentText }
+          : comment
+      );
+      setComments(updated);
+      setEditingCommentId(null);
+      setEditedCommentText("");
+    } catch (error) {
+      console.error("댓글 수정 실패", error);
+      toast.error("댓글 수정에 실패했습니다.");
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+    try {
+      await axiosInstance.delete(`/api/workout-logs/comments/${commentId}`);
+      setComments(comments.filter((c) => c.id !== commentId));
+      toast.success("댓글이 삭제되었습니다.");
+    } catch (error) {
+      console.error("댓글 삭제 실패", error);
+      toast.error("댓글 삭제에 실패했습니다.");
+    }
+  };
+
+  // 댓글 불러오기
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      fetchComments();
+    }
+  }, [userId, isAuthenticated]);
+
   // 로딩 중이면 로딩 스피너 표시
   if (isLoading) {
     return (
@@ -263,6 +361,114 @@ export default function MainPage() {
           </div>
         </div>
       </div>
+
+      {/* 댓글 섹션 - 로그인한 경우에만 표시 */}
+      {isAuthenticated && (
+        <div className="bg-white rounded-lg shadow-sm p-4 mt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">댓글</h2>
+          </div>
+
+          {isLoadingComments ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#6ca7af]"></div>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+              {comments.length > 0 ? (
+                comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50"
+                  >
+                    <div className="flex-grow">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium text-gray-900">
+                            {comment.author?.username || "사용자"}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-2">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {comment.author?._id === userId && (
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleEditComment(comment)}
+                              className="text-sm text-gray-500 hover:text-gray-700"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleDeleteComment(comment.id)}
+                              className="text-sm text-red-500 hover:text-red-700"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      {editingCommentId === comment.id ? (
+                        <div className="mt-2 flex items-center space-x-2">
+                          <input
+                            type="text"
+                            value={editedCommentText}
+                            onChange={(e) => setEditedCommentText(e.target.value)}
+                            ref={commentInputRef}
+                            className="flex-grow px-3 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6ca7af]"
+                          />
+                          <button
+                            onClick={() => handleSaveEdit(comment.id)}
+                            disabled={isSubmittingComment}
+                            className="px-3 py-1 bg-[#6ca7af] text-white rounded-md text-sm hover:bg-[#5a8f96]"
+                          >
+                            저장
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-gray-700">{comment.content}</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-4">
+                  아직 댓글이 없습니다.
+                </p>
+              )}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmitComment} className="flex space-x-2">
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요..."
+              className="min-w-0 flex-1 px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#6ca7af] focus:border-transparent"
+              disabled={isSubmittingComment}
+            />
+            <button
+              type="submit"
+              disabled={!newComment.trim() || isSubmittingComment}
+              className="px-4 py-2 rounded-md bg-[#6ca7af] text-white font-medium hover:bg-[#5a8f96] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {isSubmittingComment ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-1"></div>
+              ) : (
+                <Send className="h-4 w-4 mr-1" />
+              )}
+              댓글 작성
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
