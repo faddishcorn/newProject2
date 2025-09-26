@@ -84,13 +84,13 @@ export default function LandingPage() {
             >
               <h1>AI가 만드는 맞춤형 운동 루틴</h1>
               <p>
-                당신의 신체 정보와 목표에 맞는 최적의 운동 계획을 제공합니다
+                로그인 없이 이용 가능
               </p>
               <button
                 className="cta-button"
                 onClick={() => navigate("/main")}
               >
-                무료로 시작하기 <ArrowRight size={16} />
+                바로 시작하기 <ArrowRight size={16} />
               </button>
             </motion.div>
 
