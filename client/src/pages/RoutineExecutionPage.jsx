@@ -14,13 +14,22 @@ export default function RoutineExecutionPage() {
   const { routineId } = useParams();
   const [isAuthenticated] = useState(!!localStorage.getItem("token"));
 
-  const [routine, setRoutine] = useState(
-    location.state?.routine || {
+  const [routine, setRoutine] = useState(() => {
+    const initialRoutine = location.state?.routine || {
       id: Number.parseInt(routineId) || 1,
       title: "",
       exercises: [],
-    },
-  );
+    };
+
+    // 각 운동에 고유 ID 부여
+    return {
+      ...initialRoutine,
+      exercises: initialRoutine.exercises.map((exercise, index) => ({
+        ...exercise,
+        uniqueId: exercise.id || exercise._id || `exercise-${index}-${Date.now()}`
+      }))
+    };
+  });
 
   const completedExercises = routine.exercises.filter(
     (ex) => ex.isCompleted,
@@ -37,13 +46,13 @@ export default function RoutineExecutionPage() {
     return "대단해요! 모든 운동을 완료했습니다!";
   };
 
-  const toggleExerciseCompletion = (exerciseId) => {
+  const toggleExerciseCompletion = (uniqueId) => {
     setRoutine((prev) => ({
       ...prev,
       exercises: prev.exercises.map((exercise) =>
-        exercise.id === exerciseId || exercise._id === exerciseId
+        exercise.uniqueId === uniqueId
           ? { ...exercise, isCompleted: !exercise.isCompleted }
-          : exercise,
+          : exercise
       ),
     }));
   };
@@ -125,7 +134,7 @@ export default function RoutineExecutionPage() {
       <div className="space-y-4">
         {routine.exercises.map((exercise) => (
           <div
-            key={exercise.id || exercise._id}
+            key={exercise.uniqueId}
             className={`p-4 rounded-lg border transition-colors ${
               exercise.isCompleted
                 ? "border-green-200 bg-green-50"
@@ -146,9 +155,7 @@ export default function RoutineExecutionPage() {
                 </p>
               </div>
               <button
-                onClick={() =>
-                  toggleExerciseCompletion(exercise.id || exercise._id)
-                }
+                onClick={() => toggleExerciseCompletion(exercise.uniqueId)}
                 className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                   exercise.isCompleted
                     ? "bg-green-100 text-green-700 hover:bg-green-200"
