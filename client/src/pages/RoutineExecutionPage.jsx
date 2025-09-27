@@ -57,19 +57,34 @@ export default function RoutineExecutionPage() {
     }));
   };
 
+  // YYYY-MM-DD 형식으로 날짜를 변환하는 함수
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleCompleteRoutine = async () => {
     try {
+      // 현재 날짜를 YYYY-MM-DD 형식으로 가져오기
+      const today = new Date();
+      const date = formatDate(today);
+
       if (isAuthenticated) {
         // 회원인 경우 서버에 저장
         await axiosInstance.post("/api/routines/history", {
           title: routine.title,
           exercises: routine.exercises,
+          date: date,
         });
       } else {
         // 비회원인 경우 로컬 스토리지에 저장
         saveWorkoutLog({
           title: routine.title,
           exercises: routine.exercises,
+          date: date,
         });
       }
 

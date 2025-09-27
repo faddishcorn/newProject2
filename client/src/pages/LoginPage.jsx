@@ -59,6 +59,15 @@ export default function LoginPage() {
         }
       }
 
+      // YYYY-MM-DD 형식으로 날짜를 변환하는 함수
+      const formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       // 로컬 스토리지의 운동 기록을 서버로 동기화
       const localWorkoutLogs = JSON.parse(localStorage.getItem('workoutLogs') || '[]');
       if (localWorkoutLogs.length > 0) {
@@ -69,7 +78,7 @@ export default function LoginPage() {
             axiosInstance.post('/api/routines/history', {
               title: log.title,
               exercises: log.exercises,
-              date: log.date // 날짜 정보도 함께 전송
+              date: formatDate(log.date) // 날짜 형식을 YYYY-MM-DD로 변환하여 전송
             })
           ));
           // 동기화 후 로컬 운동 기록 삭제
