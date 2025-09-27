@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 // ✅ 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use(
         (message === "유효하지 않은 토큰입니다" ||
         message === "인증 토큰이 없습니다")
       ) {
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
 
         toast.error("세션이 만료되었습니다. 다시 로그인해주세요.", {
           autoClose: 3000,

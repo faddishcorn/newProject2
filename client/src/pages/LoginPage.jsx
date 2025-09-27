@@ -32,7 +32,7 @@ export default function LoginPage() {
 
       const res = await axiosInstance.post(`/api/auth/login`, form);
       const { token } = res.data;
-      localStorage.setItem("token", token);
+      sessionStorage.setItem("token", token);
 
       // 로컬 스토리지의 루틴을 서버로 동기화
       const localRoutines = JSON.parse(localStorage.getItem('routines') || '[]');

@@ -12,7 +12,7 @@ export default function RoutineExecutionPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { routineId } = useParams();
-  const [isAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated] = useState(!!sessionStorage.getItem("token"));
 
   const [routine, setRoutine] = useState(() => {
     const initialRoutine = location.state?.routine || {

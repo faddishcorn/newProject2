@@ -21,7 +21,7 @@ import axiosInstance from "../api/axiosInstance";
 import { toast } from "react-toastify";
 
 export default function ProfilePage() {
-  const [isAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated] = useState(!!sessionStorage.getItem("token"));
   const [user, setUser] = useState({
     username: "",
     email: "",
@@ -140,7 +140,7 @@ export default function ProfilePage() {
   const handleDeleteAccount = async () => {
     try {
       await axiosInstance.delete(`/api/users/account`);
-      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       window.location.href = "/login";
     } catch (error) {
       console.error("계정 삭제 중 오류:", error);

@@ -48,7 +48,7 @@ export default function WorkoutLogPage() {
 
   const commentInputRef = useRef(null);
 
-  const isAuthenticated = !!localStorage.getItem("token");
+  const isAuthenticated = !!sessionStorage.getItem("token");
 
   useEffect(() => {
     const init = async () => {

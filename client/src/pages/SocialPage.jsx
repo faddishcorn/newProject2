@@ -29,7 +29,7 @@ export default function SocialPage() {
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
-  const isAuthenticated = !!localStorage.getItem("token");
+  const isAuthenticated = !!sessionStorage.getItem("token");
 
   useEffect(() => {
     if (isAuthenticated) {

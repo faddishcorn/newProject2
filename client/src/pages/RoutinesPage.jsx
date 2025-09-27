@@ -47,7 +47,7 @@ export default function RoutinesPage() {
     }
   }, [promptInput]);
 
-  const isAuthenticated = !!localStorage.getItem("token");
+  const isAuthenticated = !!sessionStorage.getItem("token");
 
   useEffect(() => {
     const fetchSavedRoutines = async () => {

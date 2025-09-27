@@ -13,7 +13,7 @@ export default function MainPage() {
   const [userName, setUserName] = useState("운동하는 친구");
   const [userId, setUserId] = useState("");
   const [thisWeekWorkoutDays, setThisWeekWorkoutDays] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated, setIsAuthenticated] = useState(!!sessionStorage.getItem("token"));
   const [recommendedRoutines, setRecommendedRoutines] = useState([]);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
   const [completedRoutineTitle, setCompletedRoutineTitle] = useState("");
