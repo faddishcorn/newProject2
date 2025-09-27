@@ -147,7 +147,7 @@ export default function WorkoutLogPage() {
               title: log.title,
               exercises: log.exercises.map(exercise => ({
                 ...exercise,
-                isCompleted: true
+                isCompleted: exercise.isCompleted || false
               }))
             }));
             setDailyRoutines(routines);
@@ -204,7 +204,7 @@ export default function WorkoutLogPage() {
           title: log.title,
           exercises: log.exercises.map(exercise => ({
             ...exercise,
-            isCompleted: true // 저장된 운동은 모두 완료된 것으로 표시
+            isCompleted: exercise.isCompleted || false // 원래 상태 유지, 없으면 false
           }))
         })));
       } else {
@@ -251,7 +251,7 @@ export default function WorkoutLogPage() {
             title: log.title,
             exercises: log.exercises.map(exercise => ({
               ...exercise,
-              isCompleted: true
+              isCompleted: exercise.isCompleted || false
             }))
           }));
           setDailyRoutines(routines);
