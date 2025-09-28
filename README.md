@@ -13,7 +13,7 @@
 
 ## 주소
 
-배포 링크: [https://new-project2-one.vercel.app/ ](https://new-project2-one.vercel.app/)
+배포 링크: [https://ai-fit-plan.vercel.app/ ](https://ai-fit-plan.vercel.app/)
 
 ## 미리보기
 
