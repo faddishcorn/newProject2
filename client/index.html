@@ -11,6 +11,23 @@
     <meta property="og:type" content="website" />
     <title>바디플랜</title>
     <style>
+      /* 시스템 폰트 우선 적용 */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+      }
+
+      /* Noto Sans KR 웹폰트는 필요한 경우에만 로드 */
+      @font-face {
+        font-family: 'Noto Sans KR';
+        font-style: normal;
+        font-weight: 400;
+        font-display: optional;
+        src: local('Noto Sans KR Regular'),
+             local('NotoSansKR-Regular'),
+             url('https://fonts.gstatic.com/s/notosanskr/v38/PbykFmXiEBPT4ITbgNA5Cgm21_Y.woff2') format('woff2');
+        unicode-range: U+AC00-D7AF; /* 한글 범위만 지정 */
+      }
+
       :root {
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
