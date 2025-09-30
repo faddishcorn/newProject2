@@ -21,7 +21,7 @@
 
 ## 기술 스택
 
-- **Frontend**: React, TypeScript, TailwindCSS, Vite
+- **Frontend**: React, TailwindCSS, Vite
 - **Backend**: Express, Node.js, MongoDB
 - **AI**: OpenAI GPT API
 - **배포**: Vercel (프론트), Render (백엔드), MongoDB Atlas
